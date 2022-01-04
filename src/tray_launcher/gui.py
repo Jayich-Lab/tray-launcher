@@ -10,7 +10,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAction, QSystemTrayIcon, qApp, QApplication, QMessageBox, QMainWindow, QMenu, QFileDialog, QMessageBox
 from PyQt5.QtGui import QIcon
 
-from launcher_core import launcher_core
+from tray_launcher import core
 
 
 class LauncherTray (QMainWindow):
@@ -29,7 +29,7 @@ class LauncherTray (QMainWindow):
         self.LOGS = self.USER_HOME + "\\logs"
         self.AVAILABLE_SCRIPTS = self.USER_HOME + "\\available_scripts"
         super().__init__()
-        self.script_manager = launcher_core.ChildScriptManager()
+        self.script_manager = core.ChildScriptManager()
         t = localtime(time())
         try:
             log_directory = Path("{}\\{}_{}_{}".format(self.LOGS, t.tm_year, t.tm_mon, t.tm_mday))
