@@ -1,0 +1,9 @@
+*.ipynb_checkpoints
+*-checkpoint.ipynb
+*.pyc
+*.eps
+*.pdf
+*.png
+molecular_spectra/**/*.csv
+haoqing/issue830_test_plot.ipynb
+*.DS_Store
