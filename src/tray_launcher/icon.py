@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QAction, QSystemTrayIcon, qApp, QApplication, QMessa
 from PyQt5.QtGui import QIcon
 import sys
 
-from launcher_core import launcher_core
+#from tray_launcher import core
 
 def main():
         app = QApplication(sys.argv)
