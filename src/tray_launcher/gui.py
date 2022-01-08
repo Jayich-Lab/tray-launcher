@@ -22,7 +22,7 @@ class LauncherTray (QMainWindow):
     last_open = None
 
     def __init__(self):
-        self.HOME_PATH = getcwd() + "\\tray_launcher"
+        self.HOME_PATH = getcwd() + "\\tray_launcher"       #This line needs a new way to find home path
         self.USER = path.expanduser("~")
         self.USER_HOME = self.USER + "\\tray_launcher"
         self.LOGS = self.USER_HOME + "\\logs"
