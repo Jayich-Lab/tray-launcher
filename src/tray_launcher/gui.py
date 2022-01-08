@@ -22,7 +22,7 @@ class LauncherTray (QMainWindow):
     last_open = None
 
     def __init__(self):
-        self.HOME_PATH = getcwd() + "\\tray_launcher"       #This line needs a new way to find home path
+        self.HOME_PATH = path.dirname(__file__)
         self.USER = path.expanduser("~")
         self.USER_HOME = self.USER + "\\tray_launcher"
         self.LOGS = self.USER_HOME + "\\logs"
@@ -48,7 +48,7 @@ class LauncherTray (QMainWindow):
 
     def initUI(self):
         self.trayicon = QSystemTrayIcon(self)
-        self.trayicon.setIcon(QIcon(self.HOME_PATH + "\\tray_icon.png"))
+        self.trayicon.setIcon(QIcon(self.HOME_PATH + "\\icons\\tray_icon.png"))
         self.trayicon.setVisible(True)
 
         self.context_menu = QMenu(self)
@@ -127,7 +127,7 @@ class LauncherTray (QMainWindow):
         self.context_menu.insertMenu(self.bottom_separator, three_menu)
         self.currently_running_scripts[timestamp] = three_menu
 
-        three_menu.menuAction().setIcon(QIcon(self.HOME_PATH + "\\check_mark.png"))
+        three_menu.menuAction().setIcon(QIcon(self.HOME_PATH + "\\icons\\check_mark.png"))
         self.available_scripts[name].setEnabled(False)
 
     def show_script(self, args):
@@ -201,7 +201,7 @@ class LauncherTray (QMainWindow):
 
                 for menu in self.currently_running_scripts.values():
                     if(file_path.stem == menu.menuAction().text()):
-                        self.available_scripts[file_path.name].setIcon(QIcon(self.HOME_PATH + "\\check_mark.png"))
+                        self.available_scripts[file_path.name].setIcon(QIcon(self.HOME_PATH + "\\icons\\check_mark.png"))
                         self.available_scripts[file_path.name].setEnabled(False)
             else:
                 if(path.isfile(file_path_str)):
