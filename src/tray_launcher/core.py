@@ -91,8 +91,8 @@ class ChildScript():
     def __init__(self, script_path_str):
         self.script_path_str = script_path_str
 
-        self.USER_HOME = path.expanduser("~") + "\\tray_launcher"
-        self.LOGS = self.USER_HOME + "\\logs"
+        self.USER_HOME = Path.home() / "tray_launcher"
+        self.LOGS = self.USER_HOME / "logs"
 
     def start_script(self):
         script_path = Path(self.script_path_str)
@@ -100,20 +100,22 @@ class ChildScript():
         t = localtime(time())
 
         try:
-            log_directory = Path("{}\\{}_{}_{}".format(self.LOGS, t.tm_year, t.tm_mon, t.tm_mday))  
+            log_directory = self.LOGS / (str(t.tm_year) + "_" + str(t.tm_mon) + "_" + str(t.tm_mday))
             log_directory.mkdir(parents = True, exist_ok = True)
         except Exception as err:
             print(err + ": Failed to create new directory for outputs")
             raise
 
-        self.log_path_str = str(log_directory) + "\\{}-{}_{}_{}.log".format(script_path.stem, t.tm_hour, t.tm_min, t.tm_sec)
+        self.log_path = log_directory / "{}-{}_{}_{}.log".format(script_path.stem, t.tm_hour, t.tm_min, t.tm_sec)
 
         try:
-            self.outputs_file = open(self.log_path_str, 'a')  
+            self.outputs_file = open(self.log_path, 'a')  
         except Exception as err:
             print(err + ": Failed to open/create a file for outputs")
             raise
+
         self.childScript = Popen(self.script_path_str, encoding = self.ENCODING, stdout = self.outputs_file, stderr = self.outputs_file)
+        
         self.childScript_PID = self.childScript.pid
         print("childScript_PID: " + str(self.childScript_PID))
 
