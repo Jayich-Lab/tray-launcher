@@ -124,7 +124,7 @@ class ChildScript():
         try:
             for pid in self.current_PIDs:
                 run(['taskkill', '/F', '/T', '/PID', str(pid)])
-        except:
+        except Exception:
             print("Error when terminating child processes.")
 
         try:
