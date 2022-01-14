@@ -39,13 +39,13 @@ class LauncherTray (QMainWindow):
             log_directory = self.LOGS / (str(t.tm_year) + "_" + str(t.tm_mon) + "_" + str(t.tm_mday))
             log_directory.mkdir(parents = True, exist_ok = True)
         except Exception as err:
-            print(err + ": Failed to create new directory for outputs")
+            logging.error(err + ": Failed to create new directory for outputs")
             raise
         
         try:
             self.AVAILABLE_SCRIPTS.mkdir(parents = True, exist_ok = True)
         except Exception as err:
-            print(err + ": Failed to create new directory for available scripts")
+            logging.error(err + ": Failed to create new directory for available scripts")
             raise
         logging.basicConfig(filename = log_directory / "tray_launcher.log", level = logging.INFO, format = "%(asctime)s %(message)s")
         logging.info("Tray Launcher Started.")
@@ -144,7 +144,7 @@ class LauncherTray (QMainWindow):
             args: (Path, int), the path to the script, the timestamp of the ChildScript.
         """
         self.run_in_manager(args, self.script_manager.show)
-        print(self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs)
+        # print(self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs)
 
         logging.info("{} was brought to the front.".format(args[0].stem) + " Processes with PIDs {} are running.".format(self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs))
 
@@ -235,7 +235,7 @@ class LauncherTray (QMainWindow):
                 log_directory = self.LOGS / (str(now[0]) + "_" + str(now[1]) + "_" + str(now[2]))
                 log_directory.mkdir(parents = True, exist_ok = True)
             except Exception as err:
-                print(err + ": Failed to create new directory for outputs")
+                logging.error(err + ": Failed to create new directory for outputs")
                 raise
 
             logging.basicConfig(filename = log_directory / "tray_launcher.log", level = logging.INFO, format = "%(asctime)s %(message)s")
@@ -289,7 +289,7 @@ class LauncherTray (QMainWindow):
 
                 self.start_new_script(file_path)
             else:
-                print("Only files in \\available_script are accepted.")
+                logging.info("Only files in \\available_script are accepted.")
 
     def load_script(self, script_path):
         """Loads the specified file to the \available_scripts directory. If there is a file with the same name, asks the user if they wish to replace.
