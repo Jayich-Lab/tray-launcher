@@ -5,6 +5,7 @@ from pathlib import Path
 from functools import partial
 from shutil import copy, SameFileError
 import logging
+from subprocess import Popen
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAction, QSystemTrayIcon, qApp, QApplication, QMessageBox, QMainWindow, QMenu, QFileDialog, QMessageBox, QWidget, QDesktopWidget, QLabel, QVBoxLayout
@@ -366,10 +367,15 @@ class LauncherTray (QMainWindow):
         self.help_window.show()
 
 def main():
-        app = QApplication(argv)
-        app.setStyle("Fusion")
-        lc = LauncherTray()
-        exit(app.exec_())
+    app = QApplication(argv)
+    app.setStyle("Fusion")
+    lc = LauncherTray()
+    exit(app.exec_())
+
+def run_pythonw():
+    HOME_PATH = Path(__file__).parent / "gui.py"
+    Popen("pythonw " + str(HOME_PATH), encoding = "utf-8")
+    print("Tray Launcher is running...")
 
 if __name__ == "__main__":
     main()

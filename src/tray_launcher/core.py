@@ -26,7 +26,7 @@ class ChildScriptManager(QObject):
         c = ChildScript(str(args[0]))
         c.start_script()
         self.currently_running_ChildScripts[args[1]] = c
-        print(self.currently_running_ChildScripts)
+        # print(self.currently_running_ChildScripts)
 
     def show(self, args):
         """Brings windows associated with a script to the foreground.
