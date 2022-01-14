@@ -154,7 +154,7 @@ class ChildScript():
             if  (line != "" and line.split(" ")[0] != "ProcessId"):
                 self.current_PIDs.append(int(line))
 
-def main():
+def run_pythonw():
     HOME_PATH = Path(__file__).parent / "gui.py"
     Popen("pythonw " + str(HOME_PATH), encoding = "utf-8")
     print("Tray Launcher is running...")
