@@ -60,7 +60,7 @@ class LauncherTray (QMainWindow):
         load_new_script = QAction("Load New Script(s)", self)    
         load_new_script.triggered.connect(partial(self.load_scripts_from_file_dialogue, self.USER))
 
-        self.view_all = QMenu("Start a New Script", self)
+        self.view_all = QMenu("Start a Script", self)
         self.add_available_scripts(self.view_all)
         self.view_all.aboutToShow.connect(self.check_available_scripts)
 
