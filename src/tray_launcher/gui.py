@@ -40,13 +40,13 @@ class LauncherTray (QMainWindow):
             log_directory = self.LOGS / (str(t.tm_year) + "_" + str(t.tm_mon) + "_" + str(t.tm_mday))
             log_directory.mkdir(parents = True, exist_ok = True)
         except Exception as err:
-            logging.error(err + ": Failed to create new directory for outputs")
+            print(err + ": Failed to create new directory for outputs")
             raise
         
         try:
             self.AVAILABLE_SCRIPTS.mkdir(parents = True, exist_ok = True)
         except Exception as err:
-            logging.error(err + ": Failed to create new directory for available scripts")
+            print(err + ": Failed to create new directory for available scripts")
             raise
         logging.basicConfig(filename = log_directory / "tray_launcher.log", level = logging.INFO, format = "%(asctime)s %(message)s")
         logging.info("Tray Launcher Started.")
@@ -374,7 +374,7 @@ def main():
 
 def run_pythonw():
     HOME_PATH = Path(__file__).parent / "gui.py"
-    Popen("pythonw " + str(HOME_PATH), encoding = "utf-8")
+    Popen("python " + str(HOME_PATH), encoding = "utf-8")
     print("Tray Launcher is running...")
 
 if __name__ == "__main__":
