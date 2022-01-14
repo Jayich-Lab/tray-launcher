@@ -21,9 +21,9 @@ class ChildScriptManager(QObject):
         """Starts a new script.
 
         Args:
-            args: (str, int), the path to the script, the timestamp of the ChildScript.
+            args: (Path, int), the path to the script, the timestamp of the ChildScript.
         """
-        c = ChildScript(args[0])
+        c = ChildScript(str(args[0]))
         c.start_script()
         self.currently_running_ChildScripts[args[1]] = c
         print(self.currently_running_ChildScripts)
@@ -32,7 +32,7 @@ class ChildScriptManager(QObject):
         """Brings windows associated with a script to the foreground.
 
         Args:
-            args: (str, int), the path to the script, the timestamp of the ChildScript.
+            args: (Path, int), the path to the script, the timestamp of the ChildScript.
         """
         self.currently_running_ChildScripts[args[1]].update_current_PIDs()
         self.bring_to_front(self.currently_running_ChildScripts[args[1]].current_PIDs)

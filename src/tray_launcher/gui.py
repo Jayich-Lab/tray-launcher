@@ -103,11 +103,10 @@ class LauncherTray (QMainWindow):
             script_path: Path, path to the script to be started.
         """
         script_path_str = str(script_path)
-        name = script_path.name
 
         timestamp = time()
-        args = (script_path_str, timestamp)
-        three_menu = QMenu(Path(script_path_str).stem, self)
+        args = (script_path, timestamp)
+        three_menu = QMenu(script_path.stem, self)
 
         showAction = QAction("Show", self)
         showAction.triggered.connect(partial(self.show_script, args))
@@ -126,7 +125,7 @@ class LauncherTray (QMainWindow):
         self.none_currently_running.setVisible(False)
         self.script_count += 1
 
-        logging.info("{} was started.".format(script_path_str))
+        logging.info("{} was started.".format(script_path.stem))
 
         logAction = QAction("Log", self)
         logAction.triggered.connect(partial(self.showLogs, self.script_manager.currently_running_ChildScripts[timestamp].log_path))
@@ -136,24 +135,24 @@ class LauncherTray (QMainWindow):
         self.currently_running_scripts[timestamp] = three_menu
 
         three_menu.menuAction().setIcon(QIcon(self.check_mark))
-        self.available_scripts[name].setEnabled(False)
+        self.available_scripts[script_path.name].setEnabled(False)
 
     def show_script(self, args):
         """Bring windows associated with a script to the foreground, if any.
 
         Args:
-            args: (str, int), the path to the script, the timestamp of the ChildScript.
+            args: (Path, int), the path to the script, the timestamp of the ChildScript.
         """
         self.run_in_manager(args, self.script_manager.show)
         print(self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs)
 
-        logging.info("{} was brought to the front.".format(args[0]) + " Processes with PIDs {} are running.".format(self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs))
+        logging.info("{} was brought to the front.".format(args[0].stem) + " Processes with PIDs {} are running.".format(self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs))
 
     def terminate_script(self, args):
         """Terminate a script.
 
         Args:
-            args: ((str, int), QMenu), the path to the script, the timestamp of the ChildScript, and the QMenu associated with this script.
+            args: ((Path, int), QMenu), the path to the script, the timestamp of the ChildScript, and the QMenu associated with this script.
         """
         self.run_in_manager(args[0][1], self.script_manager.terminate)
         self.context_menu.removeAction(args[1].menuAction())
@@ -164,10 +163,10 @@ class LauncherTray (QMainWindow):
         if(self.script_count == 0):
             self.none_currently_running.setVisible(True)
 
-        self.available_scripts[Path(args[0][0]).name].setIcon(QIcon())
-        self.available_scripts[Path(args[0][0]).name].setEnabled(True)
+        self.available_scripts[(args[0][0]).name].setIcon(QIcon())
+        self.available_scripts[(args[0][0]).name].setEnabled(True)
 
-        logging.info("{} was terminated through Tray Launcher.".format(args[0][0]))
+        logging.info("{} was terminated through Tray Launcher.".format(args[0][0].stem))
 
     def restart_script(self, args):
         """Restarts a script.
@@ -178,7 +177,7 @@ class LauncherTray (QMainWindow):
         self.terminate_script(args)
         self.start_new_script(args[0][0])
         
-        logging.info("{} was restarted.".format(args[0][0]))
+        logging.info("{} was restarted.".format(args[0][0].stem))
 
     def run_in_manager(self, args, func):
         """Runs a function through the script manager.
