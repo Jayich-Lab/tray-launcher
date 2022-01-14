@@ -7,7 +7,7 @@ from shutil import copy, SameFileError
 import logging
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QAction, QSystemTrayIcon, qApp, QApplication, QMessageBox, QMainWindow, QMenu, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QAction, QSystemTrayIcon, qApp, QApplication, QMessageBox, QMainWindow, QMenu, QFileDialog, QMessageBox, QWidget, QDesktopWidget, QLabel, QVBoxLayout
 from PyQt5.QtGui import QIcon
 
 from tray_launcher import core
@@ -82,6 +82,7 @@ class LauncherTray (QMainWindow):
         logs.triggered.connect(partial(self.showLogs, self.LOGS))
 
         help_ = self.context_menu.addAction("Help")
+        help_.triggered.connect(self.showHelp)
 
         quit_ = self.context_menu.addAction("Quit")
         quit_.triggered.connect(self.quit)
@@ -344,6 +345,26 @@ class LauncherTray (QMainWindow):
         """
         logging.info("Logs {} were opened.".format(log_path))
         startfile(log_path)
+    
+    def showHelp(self):
+        """Displays a Help window in the middle of the screen"""
+        self.help_window = QWidget()
+        self.help_window.resize(100, 100)
+
+        Rect = self.help_window.frameGeometry()
+        center = QDesktopWidget().availableGeometry().center()
+        Rect.moveCenter(center)
+        self.help_window.move(Rect.topLeft())
+
+        self.help_window.setWindowTitle("Help")
+        
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel("1. Load scripts by clicking the \"Load New Scripts(s)\" option \nand" 
+                                   + " select scripts you wish to run in the future. \n2. Move over"
+                                   + " \"Start a Script\" to select one script to run. \n3. If a problem"
+                                   + " occurs, go find Tommy."))
+        self.help_window.setLayout(layout)
+        self.help_window.show()
 
 def main():
         app = QApplication(argv)
