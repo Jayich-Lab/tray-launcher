@@ -3,7 +3,7 @@ from win32gui import IsWindowEnabled, IsWindowVisible, EnumWindows, ShowWindow, 
 from win32process import GetWindowThreadProcessId, GetExitCodeProcess
 from time import localtime, time
 from pathlib import Path
-from subprocess import Popen, PIPE, run
+from subprocess import Popen, PIPE, run, CREATE_NO_WINDOW
 from signal import SIGTERM
 from win32con import SW_RESTORE, HWND_NOTOPMOST, HWND_TOPMOST, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW
 
@@ -114,7 +114,7 @@ class ChildScript():
             print(err + ": Failed to open/create a file for outputs")
             raise
 
-        self.childScript = Popen(self.script_path_str, encoding = self.ENCODING, stdout = self.outputs_file, stderr = self.outputs_file)
+        self.childScript = Popen(self.script_path_str, encoding = self.ENCODING, stdout = self.outputs_file, stderr = self.outputs_file, creationflags=CREATE_NO_WINDOW)
         
         self.childScript_PID = self.childScript.pid
         print("childScript_PID: " + str(self.childScript_PID))
@@ -137,8 +137,8 @@ class ChildScript():
     def is_active(self):
         """Checks if there is any subprocess still running."""
         self.update_current_PIDs()
-        print(self.current_PIDs)
-        print(self.childScript.poll())
+        # print(self.current_PIDs)
+        # print(self.childScript.poll())
 
         if(self.current_PIDs):
             return True
@@ -153,8 +153,3 @@ class ChildScript():
         for line in wmic_.stdout.split("\n"):
             if  (line != "" and line.split(" ")[0] != "ProcessId"):
                 self.current_PIDs.append(int(line))
-
-def run_pythonw():
-    HOME_PATH = Path(__file__).parent / "gui.py"
-    Popen("pythonw " + str(HOME_PATH), encoding = "utf-8")
-    print("Tray Launcher is running...")
