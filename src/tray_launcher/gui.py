@@ -1,4 +1,4 @@
-from sys import argv, exit
+from sys import argv, exit, stderr
 from os import startfile
 from time import time, localtime
 from pathlib import Path
@@ -103,6 +103,7 @@ class LauncherTray (QMainWindow):
         Args:
             script_path: Path, path to the script to be started.
         """
+        print("err: start_new_script", file=stderr)
         script_path_str = str(script_path)
 
         timestamp = time()
@@ -222,24 +223,24 @@ class LauncherTray (QMainWindow):
         self.view_all.addAction(self.view_in_directory)
 
     def prepare_context_menu(self):
-        """Starts a new log for this Tray Launcher for every new day. Checks if scripts are still running; if not, remove them from the menu."""
-        tm = localtime(time())
-        now = (tm.tm_year, tm.tm_mon, tm.tm_mday)
-        if(now != self.last_open):
-            self.last_open = now
+        """Checks if scripts are still running; if not, remove them from the menu."""
+        # tm = localtime(time())
+        # now = (tm.tm_year, tm.tm_mon, tm.tm_mday)
+        # if(now != self.last_open):
+        #     self.last_open = now
 
-            for handler in logging.root.handlers[:]:
-                handler.close()
-                logging.root.removeHandler(handler)
+        #     for handler in logging.root.handlers[:]:
+        #         handler.close()
+        #         logging.root.removeHandler(handler)
 
-            try:
-                log_directory = self.LOGS / (str(now[0]) + "_" + str(now[1]) + "_" + str(now[2]))
-                log_directory.mkdir(parents = True, exist_ok = True)
-            except Exception as err:
-                logging.error(err + ": Failed to create new directory for outputs")
-                raise
+        #     try:
+        #         log_directory = self.LOGS / (str(now[0]) + "_" + str(now[1]) + "_" + str(now[2]))
+        #         log_directory.mkdir(parents = True, exist_ok = True)
+        #     except Exception as err:
+        #         logging.error(err + ": Failed to create new directory for outputs")
+        #         raise
 
-            logging.basicConfig(filename = log_directory / "tray_launcher.log", level = logging.INFO, format = "%(asctime)s %(message)s")
+        #     logging.basicConfig(filename = log_directory / "tray_launcher.log", level = logging.INFO, format = "%(asctime)s %(message)s")
 
         to_del = []
         for timestamp, child_script in self.script_manager.currently_running_ChildScripts.items():
@@ -369,12 +370,23 @@ class LauncherTray (QMainWindow):
 def main():
     app = QApplication(argv)
     app.setStyle("Fusion")
+    print("in main")
     lc = LauncherTray()
     exit(app.exec_())
 
 def run_pythonw():
     HOME_PATH = Path(__file__).parent / "gui.py"
-    Popen("python " + str(HOME_PATH), encoding = "utf-8", creationflags=CREATE_NO_WINDOW)
+
+    t = localtime(time())
+    try:
+        log_directory = Path.home() / "tray_launcher" / "logs" / (str(t.tm_year) + "_" + str(t.tm_mon) + "_" + str(t.tm_mday))
+        log_directory.mkdir(parents = True, exist_ok = True)
+    except Exception as err:
+        print(err + ": Failed to create new directory for outputs")
+        raise
+
+
+    Popen("python " + str(HOME_PATH), encoding = "utf-8", creationflags=CREATE_NO_WINDOW, stdout = log_directory / "tray_launcher.log", stderr = log_directory / "tray_launcher.log")
     print("Tray Launcher is running...")
 
 if __name__ == "__main__":
