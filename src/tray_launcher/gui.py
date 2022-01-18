@@ -103,7 +103,6 @@ class LauncherTray (QMainWindow):
         Args:
             script_path: Path, path to the script to be started.
         """
-        print("err: start_new_script", file=stderr)
         script_path_str = str(script_path)
 
         timestamp = time()
@@ -146,7 +145,6 @@ class LauncherTray (QMainWindow):
             args: (Path, int), the path to the script, the timestamp of the ChildScript.
         """
         self.run_in_manager(args, self.script_manager.show)
-        # print(self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs)
 
         logging.info("{} was brought to the front.".format(args[0].stem) + " Processes with PIDs {} are running.".format(self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs))
 
@@ -224,24 +222,6 @@ class LauncherTray (QMainWindow):
 
     def prepare_context_menu(self):
         """Checks if scripts are still running; if not, remove them from the menu."""
-        # tm = localtime(time())
-        # now = (tm.tm_year, tm.tm_mon, tm.tm_mday)
-        # if(now != self.last_open):
-        #     self.last_open = now
-
-        #     for handler in logging.root.handlers[:]:
-        #         handler.close()
-        #         logging.root.removeHandler(handler)
-
-        #     try:
-        #         log_directory = self.LOGS / (str(now[0]) + "_" + str(now[1]) + "_" + str(now[2]))
-        #         log_directory.mkdir(parents = True, exist_ok = True)
-        #     except Exception as err:
-        #         logging.error(err + ": Failed to create new directory for outputs")
-        #         raise
-
-        #     logging.basicConfig(filename = log_directory / "tray_launcher.log", level = logging.INFO, format = "%(asctime)s %(message)s")
-
         to_del = []
         for timestamp, child_script in self.script_manager.currently_running_ChildScripts.items():
             if(not child_script.is_active()):
@@ -370,7 +350,6 @@ class LauncherTray (QMainWindow):
 def main():
     app = QApplication(argv)
     app.setStyle("Fusion")
-    print("in main")
     lc = LauncherTray()
     exit(app.exec_())
 
@@ -384,9 +363,9 @@ def run_pythonw():
     except Exception as err:
         print(err + ": Failed to create new directory for outputs")
         raise
+    with open(log_directory / "tray_launcher.log", "a") as launcher_log:
+        Popen("python " + str(HOME_PATH), encoding = "utf-8", creationflags=CREATE_NO_WINDOW, stdout = launcher_log, stderr = launcher_log) # this file is being written both by this stderr and the logging in the LauncherTray class
 
-
-    Popen("python " + str(HOME_PATH), encoding = "utf-8", creationflags=CREATE_NO_WINDOW, stdout = log_directory / "tray_launcher.log", stderr = log_directory / "tray_launcher.log")
     print("Tray Launcher is running...")
 
 if __name__ == "__main__":
