@@ -80,7 +80,7 @@ class ChildScriptManager(QObject):
                 SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE)
                 SetWindowPos(window_handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE)
                 SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW
-                            + SWP_NOMOVE + SWP_NOSIZE)
+                                + SWP_NOMOVE + SWP_NOSIZE)
 
 
 class ChildScript():
@@ -121,8 +121,9 @@ class ChildScript():
             print(err + ": Failed to open/create a file for outputs")
             raise
 
-        self.childScript = Popen(self.script_path_str, encoding=self.ENCODING, 
-                                stdout=self.outputs_file, stderr=self.outputs_file, creationflags=CREATE_NO_WINDOW)
+        self.childScript = Popen(self.script_path_str, encoding=self.ENCODING,
+                                stdout=self.outputs_file, stderr=self.outputs_file, 
+                                creationflags=CREATE_NO_WINDOW)
 
         self.childScript_PID = self.childScript.pid
         print("childScript_PID: " + str(self.childScript_PID))
@@ -157,7 +158,7 @@ class ChildScript():
 
     def update_current_PIDs(self):
         self.current_PIDs = []
-        wmic_ = run("wmic process where (ParentProcessId={}) get ProcessId".format(str(self.childScript_PID)), 
+        wmic_ = run("wmic process where (ParentProcessId={}) get ProcessId".format(str(self.childScript_PID)),
                 encoding=self.ENCODING, stdout=PIPE, shell=True)
         for line in wmic_.stdout.split("\n"):
             if(line != "" and line.split(" ")[0] != "ProcessId"):

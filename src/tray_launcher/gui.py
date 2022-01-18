@@ -10,7 +10,8 @@ from subprocess import Popen, CREATE_NO_WINDOW
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAction, QSystemTrayIcon, qApp
 from PyQt5.QtWidgets import QApplication, QMessageBox, QMainWindow, QMenu
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget, QDesktopWidget, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QWidget, QDesktopWidget, QLabel, QVBoxLayout
 from PyQt5.QtGui import QIcon
 
 from tray_launcher import core
@@ -131,7 +132,7 @@ class LauncherTray (QMainWindow):
         logging.info("{} was started.".format(script_path.stem))
 
         logAction = QAction("Log", self)
-        logAction.triggered.connect(partial(self.showLogs, 
+        logAction.triggered.connect(partial(self.showLogs,
                                     self.script_manager.currently_running_ChildScripts[timestamp].log_path))
         three_menu.insertAction(restartAction, logAction)
 
@@ -149,13 +150,15 @@ class LauncherTray (QMainWindow):
         """
         self.run_in_manager(args, self.script_manager.show)
 
-        logging.info("{} was brought to the front.".format(args[0].stem) + " Processes with PIDs {} are running.".format(self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs))
+        logging.info("{} was brought to the front.".format(args[0].stem) 
+                    + " Processes with PIDs {} are running."
+                    .format(self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs))
 
     def terminate_script(self, args):
         """Terminate a script.
 
         Args:
-            args: ((Path, int), QMenu), the path to the script, 
+            args: ((Path, int), QMenu), the path to the script,
                 the timestamp of the ChildScript, and the QMenu associated with this script.
         """
         self.run_in_manager(args[0][1], self.script_manager.terminate)
@@ -176,7 +179,7 @@ class LauncherTray (QMainWindow):
         """Restarts a script.
 
         Args:
-            args: ((str, int), QMenu), the path to the script, the timestamp of the ChildScript, 
+            args: ((str, int), QMenu), the path to the script, the timestamp of the ChildScript,
                 and the QMenu associated with this script.
         """
         self.terminate_script(args)
@@ -222,7 +225,8 @@ class LauncherTray (QMainWindow):
         self.add_available_scripts(self.view_all)
 
         self.view_in_directory = QAction("[View in Directory]", self)
-        self.view_in_directory.triggered.connect(partial(self.open_script_from_file_dialogue, self.AVAILABLE_SCRIPTS))
+        self.view_in_directory.triggered.connect(partial(self.open_script_from_file_dialogue, 
+                                                        self.AVAILABLE_SCRIPTS))
         self.view_all.addAction(self.view_in_directory)
 
     def prepare_context_menu(self):
@@ -239,7 +243,8 @@ class LauncherTray (QMainWindow):
                 self.script_count -= 1
                 if(self.script_count == 0):
                     self.none_currently_running.setVisible(True)
-                logging.info("{} has already been terminated. Now removed from the menu.".format(child_script.script_path_str))
+                logging.info("{} has already been terminated. Now removed from the menu."
+                            .format(child_script.script_path_str))
 
         for ts in to_del:
             del self.script_manager.currently_running_ChildScripts[ts]
@@ -249,25 +254,28 @@ class LauncherTray (QMainWindow):
         Args:
             dir: Path, path of the directory from which a file is to be loaded.
         """
-        fnames, _ = QFileDialog.getOpenFileNames(self, 'Loading New Script(s) (.bat only)', str(dir), ("Images (*.bat)"))
+        fnames, _ = QFileDialog.getOpenFileNames(self, 
+                        'Loading New Script(s) (.bat only)', str(dir), ("Images (*.bat)"))
 
         for file_name in fnames:
             self.load_script(Path(file_name))
 
     def open_script_from_file_dialogue(self, file_dialogue_path):
-        """Starts a file selected from the directory specified by the argument file_dialogue_path. 
+        """Starts a file selected from the directory specified 
+            by the argument file_dialogue_path.
             If the file is not in the \available_files directory, load it.
 
         Args:
             file_dialogue_path: Path, path of the directory from which a file is to be loaded.
         """
-        file_name, _ = QFileDialog.getOpenFileName(self, 'Starting a Script (.bat only)', 
+        file_name, _ = QFileDialog.getOpenFileName(self, 'Starting a Script (.bat only)',
                         str(file_dialogue_path), ("Images (*.bat)"))
 
         if (file_name != ""):
             file_path = Path(file_name)
 
-            if(file_path.is_file() and file_path.suffix == ".bat" and file_path.parent == self.AVAILABLE_SCRIPTS):
+            if(file_path.is_file() and file_path.suffix == ".bat" 
+                    and file_path.parent == self.AVAILABLE_SCRIPTS):
                 self.start_new_script(file_path)
             elif(file_path.is_file() and file_path.suffix == ".bat"):
                 self.load_script(file_path)
@@ -281,8 +289,9 @@ class LauncherTray (QMainWindow):
                 logging.info("Only files in \\available_script are accepted.")
 
     def load_script(self, script_path):
-        """Loads the specified file to the \available_scripts directory. 
-            If there is a file with the same name, asks the user if they wish to replace.
+        """Loads the specified file to the \available_scripts directory.
+            If there is a file with the same name, asks the user 
+            if they wish to replace.
 
         Args:
             script_path: Path, the path to the file to be loaded.
@@ -300,7 +309,8 @@ class LauncherTray (QMainWindow):
             action = QAction(script_path.stem, self)
             action.triggered.connect(partial(self.start_new_script, script_path))
             self.view_all.insertAction(self.view_in_directory, action)
-            logging.info("{} was loaded to \\available_scripts.".format(str(script_path)))
+            logging.info("{} was loaded to \\available_scripts."
+                        .format(str(script_path)))
         else:
             self.resize(1, 1)
             self.showMinimized()
@@ -309,8 +319,9 @@ class LauncherTray (QMainWindow):
             b = QMessageBox()
             b.setWindowFlag(Qt.WindowStaysOnTopHint)
             replace_reply = b.question(self, "Replace File", "A file named {} already exists in "
-                                        "\\available_scripts. Do you want to replace it?".format(script_path.name),
-                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                    "\\available_scripts. Do you want to replace it?"
+                                    .format(script_path.name),
+                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if(replace_reply == QMessageBox.Yes):
                 try:
                     copy(script_path, self.AVAILABLE_SCRIPTS)
@@ -350,9 +361,9 @@ class LauncherTray (QMainWindow):
 
         layout = QVBoxLayout()
         layout.addWidget(QLabel("1. Load scripts by clicking the \"Load New Scripts(s)\" option \nand"
-                            + " select scripts you wish to run in the future. \n2. Move over"
-                            + " \"Start a Script\" to select one script to run. \n3. If a problem"
-                            + " occurs, go find Tommy."))
+                                + " select scripts you wish to run in the future. \n2. Move over"
+                                + " \"Start a Script\" to select one script to run. \n3. If a problem"
+                                + " occurs, go find Tommy."))
         self.help_window.setLayout(layout)
         self.help_window.show()
 
@@ -369,14 +380,16 @@ def run_pythonw():
 
     t = localtime(time())
     try:
-        log_directory = Path.home() / "tray_launcher" / "logs" / (str(t.tm_year) + "_" + str(t.tm_mon) + "_" + str(t.tm_mday))
+        log_directory = Path.home() / "tray_launcher" / "logs" / (str(t.tm_year) 
+                        + "_" + str(t.tm_mon) + "_" + str(t.tm_mday))
         log_directory.mkdir(parents=True, exist_ok=True)
     except Exception as err:
         print(err + ": Failed to create new directory for outputs")
         raise
     with open(log_directory / "tray_launcher.log", "a") as launcher_log:
-        Popen("python " + str(HOME_PATH), encoding="utf-8", creationflags=CREATE_NO_WINDOW, 
-            stdout=launcher_log, stderr=launcher_log)  # this file is being written both by this stderr and the logging in the LauncherTray class
+        Popen("python " + str(HOME_PATH), encoding="utf-8", creationflags=CREATE_NO_WINDOW,
+            # this file is being written both by this stderr and the logging in the LauncherTray class
+            stdout=launcher_log, stderr=launcher_log)
 
     print("Tray Launcher is running...")
 
