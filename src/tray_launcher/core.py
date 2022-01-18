@@ -22,7 +22,7 @@ class ChildScriptManager(QObject):
         """Starts a new script.
 
         Args:
-            args: (Path, int), the path to the script, 
+            args: (Path, int), the path to the script,
                 the timestamp of the ChildScript.
         """
         c = ChildScript(str(args[0]))
@@ -34,14 +34,14 @@ class ChildScriptManager(QObject):
         """Brings windows associated with a script to the foreground.
 
         Args:
-            args: (Path, int), the path to the script, 
+            args: (Path, int), the path to the script,
                 the timestamp of the ChildScript.
         """
         self.currently_running_ChildScripts[args[1]].update_current_PIDs()
         self.bring_to_front(self.currently_running_ChildScripts[args[1]].current_PIDs)
 
     def terminate(self, timestamp):
-        """Terminates the script started at the time specified 
+        """Terminates the script started at the time specified
             by the argument timestamp.
 
         Args:
@@ -69,8 +69,8 @@ class ChildScriptManager(QObject):
     def bring_to_front(self, pids):
         """Brings the windows of processes with the given pids to the foreground.
 
-        Arg: 
-            pids: list of int, PIDs of the processes whose windows are 
+        Arg:
+            pids: list of int, PIDs of the processes whose windows are
                 to be brought to the foreground.
         """
         for pid in pids:
@@ -78,11 +78,11 @@ class ChildScriptManager(QObject):
                 ShowWindow(window_handle, SW_RESTORE)
                 SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE)
                 SetWindowPos(window_handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE)
-                SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW 
-                    + SWP_NOMOVE + SWP_NOSIZE)
+                SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW
+                        + SWP_NOMOVE + SWP_NOSIZE)
 
 
-class ChildScript():  
+class ChildScript():
     ENCODING = 'utf-8'
 
     script_path_str = ""
@@ -107,7 +107,7 @@ class ChildScript():
 
         try:
             log_directory = self.LOGS / (str(t.tm_year) + "_" + str(t.tm_mon) + "_" + str(t.tm_mday))
-            log_directory.mkdir(parents = True, exist_ok = True)
+            log_directory.mkdir(parents=True, exist_ok=True)
         except Exception as err:
             print(err + ": Failed to create new directory for outputs")
             raise
@@ -115,13 +115,13 @@ class ChildScript():
         self.log_path = log_directory / "{}-{}_{}_{}.log".format(script_path.stem, t.tm_hour, t.tm_min, t.tm_sec)
 
         try:
-            self.outputs_file = open(self.log_path, 'a')  
+            self.outputs_file = open(self.log_path, 'a')
         except Exception as err:
             print(err + ": Failed to open/create a file for outputs")
             raise
 
-        self.childScript = Popen(self.script_path_str, encoding = self.ENCODING, stdout = self.outputs_file, stderr = self.outputs_file, creationflags=CREATE_NO_WINDOW)
-        
+        self.childScript = Popen(self.script_path_str, encoding=self.ENCODING, stdout=self.outputs_file, stderr=self.outputs_file, creationflags=CREATE_NO_WINDOW)
+
         self.childScript_PID = self.childScript.pid
         print("childScript_PID: " + str(self.childScript_PID))
 
@@ -146,7 +146,7 @@ class ChildScript():
         # print(self.current_PIDs)
         # print(self.childScript.poll())
 
-        if(self.current_PIDs):
+        if(self.current_PIDs == None):
             return True
         elif(self.childScript.poll() == None):
             return True
@@ -155,7 +155,7 @@ class ChildScript():
 
     def update_current_PIDs(self):
         self.current_PIDs = []
-        wmic_ = run("wmic process where (ParentProcessId={}) get ProcessId".format(str(self.childScript_PID)), encoding = self.ENCODING, stdout = PIPE, shell = True)
+        wmic_ = run("wmic process where (ParentProcessId={}) get ProcessId".format(str(self.childScript_PID)), encoding=self.ENCODING, stdout=PIPE, shell=True)
         for line in wmic_.stdout.split("\n"):
-            if  (line != "" and line.split(" ")[0] != "ProcessId"):
+            if(line != "" and line.split(" ")[0] != "ProcessId"):
                 self.current_PIDs.append(int(line))
