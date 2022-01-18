@@ -1,17 +1,18 @@
 from os import path, kill
-from win32gui import IsWindowEnabled, IsWindowVisible, EnumWindows, ShowWindow, SetWindowPos
+from win32gui import IsWindowEnabled, IsWindowVisible
+from win32gui import EnumWindows, ShowWindow, SetWindowPos
 from win32process import GetWindowThreadProcessId, GetExitCodeProcess
 from time import localtime, time
 from pathlib import Path
 from subprocess import Popen, PIPE, run, CREATE_NO_WINDOW
 from signal import SIGTERM
-from win32con import SW_RESTORE, HWND_NOTOPMOST, HWND_TOPMOST, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW
+from win32con import SW_RESTORE, HWND_NOTOPMOST, HWND_TOPMOST
+from win32con import SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW
 
 from PyQt5.QtCore import QObject
 
-
 class ChildScriptManager(QObject):
-    #key: int, value: ChildScript
+    # key: int, value: ChildScript
     currently_running_ChildScripts = {}
 
     def __init__(self):
@@ -21,7 +22,8 @@ class ChildScriptManager(QObject):
         """Starts a new script.
 
         Args:
-            args: (Path, int), the path to the script, the timestamp of the ChildScript.
+            args: (Path, int), the path to the script, 
+                the timestamp of the ChildScript.
         """
         c = ChildScript(str(args[0]))
         c.start_script()
@@ -32,13 +34,15 @@ class ChildScriptManager(QObject):
         """Brings windows associated with a script to the foreground.
 
         Args:
-            args: (Path, int), the path to the script, the timestamp of the ChildScript.
+            args: (Path, int), the path to the script, 
+                the timestamp of the ChildScript.
         """
         self.currently_running_ChildScripts[args[1]].update_current_PIDs()
         self.bring_to_front(self.currently_running_ChildScripts[args[1]].current_PIDs)
 
     def terminate(self, timestamp):
-        """Terminates the script started at the time specified by the argument timestamp.
+        """Terminates the script started at the time specified 
+            by the argument timestamp.
 
         Args:
             args: int, the timestamp of the ChildScript.
@@ -46,13 +50,13 @@ class ChildScriptManager(QObject):
         self.currently_running_ChildScripts[timestamp].terminate_script()
         del self.currently_running_ChildScripts[timestamp]
 
-    def get_hwnds_for_PID (self, pid):
+    def get_hwnds_for_PID(self, pid):
         """Get WINDOW handles for windows associated with the given PID.
 
         Args:
             pid: int, the PID whose window handles are to be found.
         """
-        def callback (hwnd, hwnds):
+        def callback(hwnd, hwnds):
             if IsWindowVisible(hwnd) and IsWindowEnabled(hwnd):
                 _, found_pid = GetWindowThreadProcessId(hwnd)
                 if found_pid == pid:
@@ -66,14 +70,16 @@ class ChildScriptManager(QObject):
         """Brings the windows of processes with the given pids to the foreground.
 
         Arg: 
-            pids: list of int, PIDs of the processes whose windows are to be brought to the foreground.
+            pids: list of int, PIDs of the processes whose windows are 
+                to be brought to the foreground.
         """
         for pid in pids:
             for window_handle in self.get_hwnds_for_PID(pid):
                 ShowWindow(window_handle, SW_RESTORE)
                 SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE)
                 SetWindowPos(window_handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE)
-                SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW + SWP_NOMOVE + SWP_NOSIZE)
+                SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW 
+                    + SWP_NOMOVE + SWP_NOSIZE)
 
 
 class ChildScript():  
