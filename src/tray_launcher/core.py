@@ -80,7 +80,7 @@ class ChildScriptManager(QObject):
                 SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE)
                 SetWindowPos(window_handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE)
                 SetWindowPos(window_handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW
-                                + SWP_NOMOVE + SWP_NOSIZE)
+                            + SWP_NOMOVE + SWP_NOSIZE)
 
 
 class ChildScript():
@@ -107,13 +107,13 @@ class ChildScript():
         t = localtime(time())
 
         try:
-            log_directory = self.LOGS / (str(t.tm_year) + "_" + str(t.tm_mon) + "_" + str(t.tm_mday))
+            log_directory = self.LOGS / (str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2))
             log_directory.mkdir(parents=True, exist_ok=True)
         except Exception as err:
             print(err + ": Failed to create new directory for outputs")
             raise
 
-        self.log_path = log_directory / "{}-{}_{}_{}.log".format(script_path.stem, t.tm_hour, t.tm_min, t.tm_sec)
+        self.log_path = log_directory / "{}-{}_{}_{}.log".format(script_path.stem, str(t.tm_hour).zfill(2), str(t.tm_min).zfill(2), str(t.tm_sec).zfill(2))
 
         try:
             self.outputs_file = open(self.log_path, 'a')
@@ -122,8 +122,8 @@ class ChildScript():
             raise
 
         self.childScript = Popen(self.script_path_str, encoding=self.ENCODING,
-                                stdout=self.outputs_file, stderr=self.outputs_file, 
-                                creationflags=CREATE_NO_WINDOW)
+                            stdout=self.outputs_file, stderr=self.outputs_file, 
+                            creationflags=CREATE_NO_WINDOW)
 
         self.childScript_PID = self.childScript.pid
         print("childScript_PID: " + str(self.childScript_PID))
