@@ -2,7 +2,7 @@ import shutil
 
 import nox
 
-nox.options.sessions = ("lint")
+nox.options.sessions = ("lint",)
 src_paths = ("src", "noxfile.py")
 
 
