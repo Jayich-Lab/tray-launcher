@@ -1,0 +1,34 @@
+name: pre-commit cronjob
+
+on:
+  schedule:
+    - cron: '0 0 * * SUN'
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PYTHON_VERSION_SHORT: 3.8
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ env.PYTHON_VERSION_SHORT }}
+
+    - run: pip install pre-commit
+
+    - name: pre-commit run --all-files, commit, and push
+      run: |
+        set +e
+        pre-commit run --all-files
+        PRE_COMMIT_RETVAL=$?
+        set -e
+        if [[ $PRE_COMMIT_RETVAL -eq 1 ]]; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -a -m 'Run pre-commit on all files'
+            git push
+        fi
