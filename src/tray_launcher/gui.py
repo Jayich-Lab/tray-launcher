@@ -24,6 +24,8 @@ class LauncherTray (QMainWindow):
     currently_running_scripts = {}      # key: int, value: QMenu
     available_scripts = {}              # key: str, value: QAction
 
+    test_dummy = 0
+
     def __init__(self):
         self.HOME_PATH = Path(core.__file__).parent
         self.USER = Path.home()
