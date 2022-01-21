@@ -23,7 +23,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: .nox
-        key: nox-${{ runner.os }}-${{ hashFiles('noxfile.py', '.github/workflows/lint.yml') }}
+        key: nox-${{ runner.os }}-${{ hashFiles('noxfile.py', '.github/workflows/ci.yml') }}
 
     - name: Lint
       run: |
