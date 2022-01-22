@@ -1,0 +1,161 @@
+name: CI
+
+
+
+
+
+
+
+
+
+on:
+
+
+ push:
+
+
+ # run weekly on main to ensure that main always has caches stored
+
+
+ schedule:
+
+
+   - cron: "0 0 * * SUN"
+
+
+
+
+
+
+
+jobs:
+
+
+ ci:
+
+
+   runs-on: ubuntu-latest
+
+
+   timeout-minutes: 5
+
+
+   defaults:
+
+
+     run:
+
+
+       # use a login shell so that run steps will activate the venv
+
+
+       shell: bash -e -o pipefail -l {0}
+
+
+   env:
+
+
+     PYTHON_VERSION: 3.8
+
+
+
+
+
+
+
+   steps:
+
+
+   - name: Checkout
+
+
+     uses: actions/checkout@v2
+
+
+
+
+
+
+
+   - name: Set up Python
+
+
+     uses: actions/setup-python@v2
+
+
+     with:
+
+
+       python-version: ${{ env.PYTHON_VERSION }}
+
+
+
+
+
+
+
+   - name: Set up Python venv
+
+
+     run: |
+
+
+       python -m venv ~/venv
+
+
+       echo "source ~/venv/bin/activate" >> "$HOME"/.bash_profile
+
+
+       source ~/venv/bin/activate
+
+
+       echo "PYTHON_VERSION_FULL=$(python -V | grep -Po '\d+\.\d+\.\d+')" >> $GITHUB_ENV
+
+
+   - name: Cache Python venv
+
+
+     id: cache-venv
+
+
+     uses: actions/cache@v2
+
+
+     with:
+
+
+       path: ~/venv
+
+
+       key: ${{ runner.os }}-${{ env.PYTHON_VERSION_FULL }}-venv
+
+
+
+
+
+
+
+   - name: Install Python dependencies from PyPI
+
+
+     if: steps.cache-venv.outputs.cache-hit != 'true'
+
+
+     run: |
+
+
+       python -m pip install --upgrade pip
+
+
+       pip install pycodestyle
+
+
+   - name: Lint PEP 8
+
+
+     run: |
+
+
+       pycodestyle
+
+
