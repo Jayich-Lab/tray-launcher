@@ -3,8 +3,10 @@
 __pycache__/
 
 # Python packaging
-/src/*.egg-info/
+*.egg-info/
+/build/
 /dist/
 
 # dev tooling
 /.venv/
+/.nox/
