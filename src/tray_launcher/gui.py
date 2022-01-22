@@ -424,7 +424,7 @@ def run_pythonw():
             "python " + str(HOME_PATH),
             encoding="utf-8",
             creationflags=CREATE_NO_WINDOW,
-            # this file is being written both by this stderr 
+            # this file is being written both by this stderr
             # and the logging in the LauncherTray class
             stdout=launcher_log,
             stderr=launcher_log,
