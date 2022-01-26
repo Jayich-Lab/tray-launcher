@@ -14,6 +14,8 @@ In the near future when it's up in PyPi, you should be able to install it by `pi
 
 To start the tray launcher, first make sure you are in `code3` or `artiq`. Then, running `tray-launcher` will show a small icon in the taskbar.
 
-Before you run any scripts from the tray launcher, you need to load them. This can be done simply by the option "Load New Script(s)" in the contextmenu. Only .bat files are accepted.
+Before you run any scripts from the tray launcher, you need to load them. This can be done by clocking the option "Load New Script(s)" in the contextmenu. Only .bat files are accepted.
 
-To run a script, select it in the "Start a Script" submenu in the contextmenu or click "View All" to see loaded scripts in a file dialogue. 
+To run a script, select it in the "Start a Script" submenu from the contextmenu, or click "View All" to see all loaded scripts in a file dialogue. 
+
+The tray launcher will list all scripts you started and are currently running. Move the cursor over to view more actions.
