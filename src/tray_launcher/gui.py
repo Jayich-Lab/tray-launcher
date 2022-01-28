@@ -1,18 +1,30 @@
-from sys import argv, exit, stderr
-from os import startfile
-from time import time, localtime
-from pathlib import Path
-from functools import partial
-from shutil import copy, SameFileError
 import logging
-from subprocess import Popen, CREATE_NO_WINDOW
+from functools import partial
+from os import startfile
+from pathlib import Path
+from shutil import SameFileError
+from shutil import copy
+from subprocess import CREATE_NO_WINDOW
+from subprocess import Popen
+from sys import argv
+from sys import exit
+from time import localtime
+from time import time
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QAction, QSystemTrayIcon, qApp
-from PyQt5.QtWidgets import QApplication, QMessageBox, QMainWindow, QMenu
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
-from PyQt5.QtWidgets import QWidget, QDesktopWidget, QLabel, QVBoxLayout
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QDesktopWidget
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMenu
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QSystemTrayIcon
+from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import qApp
 
 from tray_launcher import core
 
@@ -110,7 +122,6 @@ class LauncherTray(QMainWindow):
         Args:
             script_path: Path, path to the script to be started.
         """
-        script_path_str = str(script_path)
 
         timestamp = time()
         args = (script_path, timestamp)
@@ -401,6 +412,7 @@ def main():
     app = QApplication(argv)
     app.setStyle("Fusion")
     lc = LauncherTray()
+    lc.show()
     exit(app.exec_())
 
 

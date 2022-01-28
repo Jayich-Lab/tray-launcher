@@ -1,15 +1,26 @@
-from os import path, kill
-from win32gui import IsWindowEnabled, IsWindowVisible
-from win32gui import EnumWindows, ShowWindow, SetWindowPos
-from win32process import GetWindowThreadProcessId, GetExitCodeProcess
-from time import localtime, time
+from os import kill
 from pathlib import Path
-from subprocess import Popen, PIPE, run, CREATE_NO_WINDOW
 from signal import SIGTERM
-from win32con import SW_RESTORE, HWND_NOTOPMOST, HWND_TOPMOST
-from win32con import SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW
+from subprocess import CREATE_NO_WINDOW
+from subprocess import PIPE
+from subprocess import Popen
+from subprocess import run
+from time import localtime
+from time import time
 
 from PyQt5.QtCore import QObject
+from win32con import HWND_NOTOPMOST
+from win32con import HWND_TOPMOST
+from win32con import SW_RESTORE
+from win32con import SWP_NOMOVE
+from win32con import SWP_NOSIZE
+from win32con import SWP_SHOWWINDOW
+from win32gui import EnumWindows
+from win32gui import IsWindowEnabled
+from win32gui import IsWindowVisible
+from win32gui import SetWindowPos
+from win32gui import ShowWindow
+from win32process import GetWindowThreadProcessId
 
 
 class ChildScriptManager(QObject):
