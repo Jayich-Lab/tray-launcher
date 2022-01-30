@@ -219,7 +219,7 @@ class LauncherTray(QMainWindow):
         dummy_action.trigger()
 
     def add_available_scripts(self, target_menu):
-        """Loads all .bat files in the \scripts directory to the menu specified.
+        """Loads all .bat files in the \\scripts directory to the menu specified.
 
         Args:
             target_menu: QMenu, the menu to be loaded with .bat file stems.
@@ -239,7 +239,7 @@ class LauncherTray(QMainWindow):
                     file_path.unlink()  # Not sure if this really REMOVEs the file
 
     def check_available_scripts(self):
-        """Reloads .bat files in the \scripts directory to the view_all menu"""
+        """Reloads .bat files in the \\scripts directory to the view_all menu"""
         self.view_all.clear()
 
         self.add_available_scripts(self.view_all)
@@ -290,7 +290,7 @@ class LauncherTray(QMainWindow):
     def open_script_from_file_dialogue(self, file_dialogue_path):
         """Starts a file selected from the directory specified
             by the argument file_dialogue_path.
-            If the file is not in the \scripts directory, load it.
+            If the file is not in the \\scripts directory, load it.
 
         Args:
             file_dialogue_path: Path, path of the directory from which a file is to be loaded.
@@ -320,7 +320,7 @@ class LauncherTray(QMainWindow):
                 logging.info("Only .bat file is accepted.")
 
     def load_script(self, script_path):
-        """Loads the specified file to the \scripts directory.
+        """Loads the specified file to the \\scripts directory.
             If there is a file with the same name, asks the user
             if they wish to replace.
 
