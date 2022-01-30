@@ -10,7 +10,7 @@ src_paths = ("src", "noxfile.py")
 def fmt(session: nox.Session) -> None:
     """Run code formatters."""
     session.install(
-        "black==21.12b0",
+        "black",
         "isort",
         "codespell",
     )
