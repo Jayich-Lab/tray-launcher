@@ -357,11 +357,25 @@ class LauncherTray(QMainWindow):
                 return
 
     def quit(self):
-        for timestamp in self.currently_running_scripts.keys():
-            self.script_manager.terminate(timestamp)
-        logging.info("Tray Launcher Exited.")
-        self.script_manager.deleteLater()
-        qApp.quit()
+        self.resize(1, 1)
+        self.showMinimized()
+        self.showMaximized()
+        self.resize(0, 0)
+        b = QMessageBox()
+        b.setWindowFlag(Qt.WindowStaysOnTopHint)
+        replace_reply = b.question(
+            self,
+            "Tray Launcher",
+            "Are you sure you want to quit?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if replace_reply == QMessageBox.Yes:
+            for timestamp in self.currently_running_scripts.keys():
+                self.script_manager.terminate(timestamp)
+            logging.info("Tray Launcher Exited.")
+            self.script_manager.deleteLater()
+            qApp.quit()
 
     def showLogs(self, log_path):
         """Displays the file specified.
