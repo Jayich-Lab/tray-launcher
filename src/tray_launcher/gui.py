@@ -38,9 +38,9 @@ class LauncherTray(QMainWindow):
         self.HOME_PATH = Path(core.__file__).parent
         self.USER = Path.home()
 
-        self.USER_HOME = self.USER / "tray_launcher"
+        self.USER_HOME = self.USER / ".tray_launcher"
         self.LOGS = self.USER_HOME / "logs"
-        self.AVAILABLE_SCRIPTS = self.USER_HOME / "available_scripts"
+        self.AVAILABLE_SCRIPTS = self.USER_HOME / "scripts"
 
         self.icon = str(self.HOME_PATH / "icons" / "tray_icon.png")
         self.check_mark = str(self.HOME_PATH / "icons" / "check_mark.png")
@@ -219,7 +219,7 @@ class LauncherTray(QMainWindow):
         dummy_action.trigger()
 
     def add_available_scripts(self, target_menu):
-        """Loads all .bat files in the \available_scripts directory to the menu specified.
+        """Loads all .bat files in the \\scripts directory to the menu specified.
 
         Args:
             target_menu: QMenu, the menu to be loaded with .bat file stems.
@@ -239,7 +239,7 @@ class LauncherTray(QMainWindow):
                     file_path.unlink()  # Not sure if this really REMOVEs the file
 
     def check_available_scripts(self):
-        """Reloads .bat files in the \available_scripts directory to the view_all menu"""
+        """Reloads .bat files in the \\scripts directory to the view_all menu"""
         self.view_all.clear()
 
         self.add_available_scripts(self.view_all)
@@ -290,7 +290,7 @@ class LauncherTray(QMainWindow):
     def open_script_from_file_dialogue(self, file_dialogue_path):
         """Starts a file selected from the directory specified
             by the argument file_dialogue_path.
-            If the file is not in the \available_files directory, load it.
+            If the file is not in the \\scripts directory, load it.
 
         Args:
             file_dialogue_path: Path, path of the directory from which a file is to be loaded.
@@ -317,10 +317,10 @@ class LauncherTray(QMainWindow):
 
                 self.start_new_script(file_path)
             else:
-                logging.info("Only files in \\available_script are accepted.")
+                logging.info("Only .bat file is accepted.")
 
     def load_script(self, script_path):
-        """Loads the specified file to the \available_scripts directory.
+        """Loads the specified file to the \\scripts directory.
             If there is a file with the same name, asks the user
             if they wish to replace.
 
@@ -340,7 +340,7 @@ class LauncherTray(QMainWindow):
             action = QAction(script_path.stem, self)
             action.triggered.connect(partial(self.start_new_script, script_path))
             self.view_all.insertAction(self.view_in_directory, action)
-            logging.info("{} was loaded to \\available_scripts.".format(str(script_path)))
+            logging.info("{} was loaded to \\scripts.".format(str(script_path)))
         else:
             self.resize(1, 1)
             self.showMinimized()
@@ -352,14 +352,14 @@ class LauncherTray(QMainWindow):
                 self,
                 "Replace File",
                 "A file named {} already exists in "
-                "\\available_scripts. Do you want to replace it?".format(script_path.name),
+                "\\scripts. Do you want to replace it?".format(script_path.name),
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No,
             )
             if replace_reply == QMessageBox.Yes:
                 try:
                     _su.copy(script_path, self.AVAILABLE_SCRIPTS)
-                    logging.info("{} was replaced in \\available_scripts.".format(str(script_path)))
+                    logging.info("{} was replaced in \\scripts.".format(str(script_path)))
                 except _su.SameFileError:
                     return
             else:
