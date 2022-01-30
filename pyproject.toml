@@ -19,4 +19,3 @@ py_version = "37"
 line_length = 100
 skip_gitignore = true
 profile = "black"
-force_single_line = true

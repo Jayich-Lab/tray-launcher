@@ -1,15 +1,20 @@
-from os import path, kill
-from win32gui import IsWindowEnabled, IsWindowVisible
-from win32gui import EnumWindows, ShowWindow, SetWindowPos
-from win32process import GetWindowThreadProcessId, GetExitCodeProcess
-from time import localtime, time
+import os
+import signal
+import subprocess
+import time as _t
 from pathlib import Path
-from subprocess import Popen, PIPE, run, CREATE_NO_WINDOW
-from signal import SIGTERM
-from win32con import SW_RESTORE, HWND_NOTOPMOST, HWND_TOPMOST
-from win32con import SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW
 
 from PyQt5.QtCore import QObject
+from win32con import (
+    HWND_NOTOPMOST,
+    HWND_TOPMOST,
+    SW_RESTORE,
+    SWP_NOMOVE,
+    SWP_NOSIZE,
+    SWP_SHOWWINDOW,
+)
+from win32gui import EnumWindows, IsWindowEnabled, IsWindowVisible, SetWindowPos, ShowWindow
+from win32process import GetWindowThreadProcessId
 
 
 class ChildScriptManager(QObject):
@@ -113,7 +118,7 @@ class ChildScript:
     def start_script(self):
         script_path = Path(self.script_path_str)
 
-        t = localtime(time())
+        t = _t.localtime(_t.time())
 
         try:
             log_directory = self.LOGS / (
@@ -137,12 +142,12 @@ class ChildScript:
             print(err + ": Failed to open/create a file for outputs")
             raise
 
-        self.childScript = Popen(
+        self.childScript = subprocess.Popen(
             self.script_path_str,
             encoding=self.ENCODING,
             stdout=self.outputs_file,
             stderr=self.outputs_file,
-            creationflags=CREATE_NO_WINDOW,
+            creationflags=subprocess.CREATE_NO_WINDOW,
         )
 
         self.childScript_PID = self.childScript.pid
@@ -152,13 +157,13 @@ class ChildScript:
         self.update_current_PIDs()
         try:
             for pid in self.current_PIDs:
-                run(["taskkill", "/F", "/T", "/PID", str(pid)])
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)])
         except Exception:
             print("Error when terminating child processes.")
 
         try:
             self.outputs_file.close()
-            kill(self.childScript_PID, SIGTERM)
+            os.kill(self.childScript_PID, signal.SIGTERM)
         except OSError:
             print("The Popen process is not running")
             return
@@ -178,12 +183,12 @@ class ChildScript:
 
     def update_current_PIDs(self):
         self.current_PIDs = []
-        wmic_ = run(
+        wmic_ = subprocess.run(
             "wmic process where (ParentProcessId={}) get ProcessId".format(
                 str(self.childScript_PID)
             ),
             encoding=self.ENCODING,
-            stdout=PIPE,
+            stdout=subprocess.PIPE,
             shell=True,
         )
         for line in wmic_.stdout.split("\n"):

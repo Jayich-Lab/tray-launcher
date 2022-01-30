@@ -1,18 +1,28 @@
-from sys import argv, exit, stderr
-from os import startfile
-from time import time, localtime
-from pathlib import Path
-from functools import partial
-from shutil import copy, SameFileError
 import logging
-from subprocess import Popen, CREATE_NO_WINDOW
+import os
+import shutil as _su
+import subprocess
+import sys
+import time as _t
+from functools import partial
+from pathlib import Path
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QAction, QSystemTrayIcon, qApp
-from PyQt5.QtWidgets import QApplication, QMessageBox, QMainWindow, QMenu
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
-from PyQt5.QtWidgets import QWidget, QDesktopWidget, QLabel, QVBoxLayout
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QDesktopWidget,
+    QFileDialog,
+    QLabel,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QSystemTrayIcon,
+    QVBoxLayout,
+    QWidget,
+    qApp,
+)
 
 from tray_launcher import core
 
@@ -37,7 +47,7 @@ class LauncherTray(QMainWindow):
 
         super().__init__()
         self.script_manager = core.ChildScriptManager()
-        t = localtime(time())
+        t = _t.localtime(_t.time())
         try:
             log_directory = self.LOGS / (
                 str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2)
@@ -110,9 +120,8 @@ class LauncherTray(QMainWindow):
         Args:
             script_path: Path, path to the script to be started.
         """
-        script_path_str = str(script_path)
 
-        timestamp = time()
+        timestamp = _t.time()
         args = (script_path, timestamp)
         three_menu = QMenu(script_path.stem, self)
 
@@ -327,7 +336,7 @@ class LauncherTray(QMainWindow):
                     break
 
         if not isDuplicateName:
-            copy(script_path, self.AVAILABLE_SCRIPTS)
+            _su.copy(script_path, self.AVAILABLE_SCRIPTS)
             action = QAction(script_path.stem, self)
             action.triggered.connect(partial(self.start_new_script, script_path))
             self.view_all.insertAction(self.view_in_directory, action)
@@ -349,9 +358,9 @@ class LauncherTray(QMainWindow):
             )
             if replace_reply == QMessageBox.Yes:
                 try:
-                    copy(script_path, self.AVAILABLE_SCRIPTS)
+                    _su.copy(script_path, self.AVAILABLE_SCRIPTS)
                     logging.info("{} was replaced in \\available_scripts.".format(str(script_path)))
-                except SameFileError:
+                except _su.SameFileError:
                     return
             else:
                 return
@@ -370,7 +379,7 @@ class LauncherTray(QMainWindow):
             log_path: Path, the path to the file to be opened.
         """
         logging.info("Logs {} were opened.".format(log_path))
-        startfile(log_path)
+        os.startfile(log_path)
 
     def showHelp(self):
         """Displays a Help window in the middle of the screen"""
@@ -398,16 +407,17 @@ class LauncherTray(QMainWindow):
 
 
 def main():
-    app = QApplication(argv)
+    app = QApplication(sys.argv)
     app.setStyle("Fusion")
     lc = LauncherTray()
-    exit(app.exec_())
+    lc.show()
+    sys.exit(app.exec_())
 
 
 def run_pythonw():
     HOME_PATH = Path(__file__).parent / "gui.py"
 
-    t = localtime(time())
+    t = _t.localtime(_t.time())
     try:
         log_directory = (
             Path.home()
@@ -420,10 +430,10 @@ def run_pythonw():
         print(err + ": Failed to create new directory for outputs")
         raise
     with open(log_directory / "tray_launcher.log", "a") as launcher_log:
-        Popen(
+        subprocess.Popen(
             "python " + str(HOME_PATH),
             encoding="utf-8",
-            creationflags=CREATE_NO_WINDOW,
+            creationflags=subprocess.CREATE_NO_WINDOW,
             # this file is being written both by this stderr
             # and the logging in the LauncherTray class
             stdout=launcher_log,
