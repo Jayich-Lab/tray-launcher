@@ -375,7 +375,7 @@ class LauncherTray(QMainWindow):
         replace_reply = b.question(
             self,
             "Quit Tray Launcher",
-            "Do you want to quit tray launcher",
+            "Do you want to quit tray launcher?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.Yes,
         )
