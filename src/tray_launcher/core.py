@@ -34,7 +34,6 @@ class ChildScriptManager(QObject):
         c = ChildScript(str(args[0]))
         c.start_script()
         self.currently_running_ChildScripts[args[1]] = c
-        # print(self.currently_running_ChildScripts)
 
     def show(self, args):
         """Brings windows associated with a script to the foreground.
@@ -112,7 +111,7 @@ class ChildScript:
     def __init__(self, script_path_str):
         self.script_path_str = script_path_str
 
-        self.USER_HOME = Path.home() / "tray_launcher"
+        self.USER_HOME = Path.home() / ".tray_launcher"
         self.LOGS = self.USER_HOME / "logs"
 
     def start_script(self):
@@ -171,8 +170,6 @@ class ChildScript:
     def is_active(self):
         """Checks if there is any subprocess still running."""
         self.update_current_PIDs()
-        # print(self.current_PIDs)
-        # print(self.childScript.poll())
 
         if self.current_PIDs is None:
             return True

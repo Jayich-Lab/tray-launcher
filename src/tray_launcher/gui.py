@@ -38,7 +38,7 @@ class LauncherTray(QMainWindow):
         self.HOME_PATH = Path(core.__file__).parent
         self.USER = Path.home()
 
-        self.USER_HOME = self.USER / "tray_launcher"
+        self.USER_HOME = self.USER / ".tray_launcher"
         self.LOGS = self.USER_HOME / "logs"
         self.AVAILABLE_SCRIPTS = self.USER_HOME / "available_scripts"
 
@@ -454,7 +454,7 @@ def run_pythonw():
             stderr=launcher_log,
         )
 
-    print("Tray Launcher is running...")
+    print("Tray Launcher is running...New1")
 
 
 if __name__ == "__main__":
