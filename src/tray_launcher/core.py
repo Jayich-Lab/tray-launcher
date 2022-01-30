@@ -5,17 +5,15 @@ import time as _t
 from pathlib import Path
 
 from PyQt5.QtCore import QObject
-from win32con import HWND_NOTOPMOST
-from win32con import HWND_TOPMOST
-from win32con import SW_RESTORE
-from win32con import SWP_NOMOVE
-from win32con import SWP_NOSIZE
-from win32con import SWP_SHOWWINDOW
-from win32gui import EnumWindows
-from win32gui import IsWindowEnabled
-from win32gui import IsWindowVisible
-from win32gui import SetWindowPos
-from win32gui import ShowWindow
+from win32con import (
+    HWND_NOTOPMOST,
+    HWND_TOPMOST,
+    SW_RESTORE,
+    SWP_NOMOVE,
+    SWP_NOSIZE,
+    SWP_SHOWWINDOW,
+)
+from win32gui import EnumWindows, IsWindowEnabled, IsWindowVisible, SetWindowPos, ShowWindow
 from win32process import GetWindowThreadProcessId
 
 

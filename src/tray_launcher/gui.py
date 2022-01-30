@@ -9,18 +9,20 @@ from pathlib import Path
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QDesktopWidget
-from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtWidgets import QLabel
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtWidgets import QMenu
-from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtWidgets import QSystemTrayIcon
-from PyQt5.QtWidgets import QVBoxLayout
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtWidgets import qApp
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QDesktopWidget,
+    QFileDialog,
+    QLabel,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QSystemTrayIcon,
+    QVBoxLayout,
+    QWidget,
+    qApp,
+)
 
 from tray_launcher import core
 
