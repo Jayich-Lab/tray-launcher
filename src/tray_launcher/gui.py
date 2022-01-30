@@ -454,7 +454,7 @@ def run_pythonw():
             stderr=launcher_log,
         )
 
-    print("Tray Launcher is running...New2")
+    print("Tray Launcher is running...")
 
 
 if __name__ == "__main__":
