@@ -18,4 +18,4 @@ line-length = 100
 py_version = "37"
 line_length = 100
 skip_gitignore = true
-profile = "black"
+profile = "black=21.12b0"
