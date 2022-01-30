@@ -1,9 +1,9 @@
+import os
 import signal
 import subprocess
-import os
 import time as _t
-
 from pathlib import Path
+
 from PyQt5.QtCore import QObject
 from win32con import HWND_NOTOPMOST
 from win32con import HWND_TOPMOST
