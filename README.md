@@ -10,7 +10,7 @@ A launcher resided in the task bar for managing .bat scripts.
 
 ## Usage
 
-To start the *tray launcher*, first make sure you are in the Python environment variable where tray-launcher is installed. Then, running `tray-launcher` will show a small icon in the taskbar.
+To start the *tray launcher*, first make sure you are in the Python environment variable where *tray-launcher* is installed. Then, running `tray-launcher` will show a small icon in the taskbar.
 
 Before you run any scripts from the tray launcher, you need to load them. This can be done by clicking the option **Load New Script(s)** in the contextmenu. Alternatively, you could also paste your scripts under `%USERPROFILE%\tray_launcher\available_scripts`. Only *.bat* files are accepted.
 
