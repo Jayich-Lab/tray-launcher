@@ -16,7 +16,7 @@ async def handle_echo(reader, writer):
     # await writer.wait_closed()
 
 async def main():
-    server = await asyncio.start_server(handle_echo, '127.0.0.1', 8888)
+    server = await asyncio.start_server(handle_echo, '127.0.0.1', 0)
     addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
     print("Serving on {}".format(addrs))
 
