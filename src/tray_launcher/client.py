@@ -1,7 +1,7 @@
 import asyncio
 
 async def echo_client(message):
-    reader, writer = await asyncio.open_connection('127.0.0.1', 8888)
+    reader, writer = await asyncio.open_connection('', 0)
     print("Send: {}".format(message))
     writer.write(message.encode())
 
@@ -13,3 +13,8 @@ async def echo_client(message):
     # await writer.wait_closed()
 
 asyncio.run(echo_client("Hello World"))
+
+# import socket
+# sock = socket.socket()
+# sock.bind(('', 0))
+# print(sock.getsockname())

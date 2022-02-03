@@ -236,7 +236,7 @@ class LauncherTray(QMainWindow):
                         self.available_scripts[file_path.name].setEnabled(False)
             else:
                 if file_path.is_file:
-                    file_path.unlink()  # Not sure if this really REMOVEs the file
+                    file_path.unlink()
 
     def check_available_scripts(self):
         """Reloads .bat files in the \\scripts directory to the view_all menu"""
