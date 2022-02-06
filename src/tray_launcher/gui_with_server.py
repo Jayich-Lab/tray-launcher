@@ -30,7 +30,7 @@ from PyQt5.QtWidgets import (
     qApp,
 )
 
-from tray_launcher import client, core
+from tray_launcher import core
 
 
 class LauncherTray(QMainWindow):
