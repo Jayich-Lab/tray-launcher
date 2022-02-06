@@ -1,1 +1,0 @@
-activate artiq && python C:\Users\scientist\code\tray-launcher\src\tray_launcher\gui_with_server.py

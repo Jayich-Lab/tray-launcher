@@ -91,10 +91,34 @@ class LauncherTray(QMainWindow):
         clientConnection.disconnected.connect(clientConnection.deleteLater)
         clientConnection.disconnectFromHost()
 
+
+        #Only the CLIENT can print to the screen, so write to the CLIENT!!
         if(data[0] == "start"):
+            for p in data:
+                file_path = Path(p)
+                if(file_path.is_file()):
+                    self.open_script_from_file_dialogue(file_path)  #But we need to write to the client if the file is not valid because of blablabla...
+
+                else:
+                    full_path = self.toFullPath(p)
+                    if(full_path != None):
+                        self.start_new_script(full_path)
+                    else:
+                        #Write to the client asking for a valid path
+                        return
+                
+
+                # if(self.isLoadedStem(p)):
+                #     self.open_script_from_file_dialogue(self.toFullPath(p))
             return
         elif(data[0] == "terminate"):
-            return
+            for p in data:
+                full_path = self.toFullPath(p, True)
+                if(full_path != None):
+                    self.terminate_script() #Add those arguments. IMPORTANT: we might not have the info needed, so we have to change some old codes to preserve the info we need here: like which menu is associated with each childScript
+                else:
+                    #Write to the CLIENT saying that the requested script is not running
+                    return
         elif(data[0] == "list"):
             return
         elif(data[0] == "load"):
@@ -106,11 +130,26 @@ class LauncherTray(QMainWindow):
         elif(data[0] == "front"):
             return
         elif(data[0] == "quit"):
-            self.quick_quit()
+            self.quickQuit()
             return
 
-        
-        
+    #This is gonna be used in start_new_script(). No duplicate (even names) is allowed
+    def isCurrentlyRunning(self, script_path):
+        return
+
+    #Should call add_available_scripts() to clear the "scripts" directory
+    def toFullPath(self, str_given, running_flag=False):
+        if(not running_flag):
+            for existing_file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
+                if existing_file_path.stem == str_given or existing_file_path.name == str_given:
+                    return existing_file_path
+            return None
+        else:
+            #check in ScriptManager.CurrentlyRunningChildscripts
+            return
+
+
+
 
     def initServer(self):
         self.server = QTcpServer(self)
@@ -438,7 +477,7 @@ class LauncherTray(QMainWindow):
             self.script_manager.deleteLater()
             qApp.quit()
     
-    def quick_quit(self):
+    def quickQuit(self):
         for timestamp in self.currently_running_scripts.keys():
             self.script_manager.terminate(timestamp)
         logging.info("Tray Launcher Exited.")
