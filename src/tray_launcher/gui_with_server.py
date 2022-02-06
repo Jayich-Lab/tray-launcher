@@ -84,13 +84,32 @@ class LauncherTray(QMainWindow):
 
         data = []
         while(not clientConnection.atEnd()):
-            data.append(clientConnection.readLine().decode())
-        
-        for i in data:
-            print(i + "\n")
+            data.append(str(clientConnection.readLine(), encoding="ascii")[0:-1])
+
+        print(data)
 
         clientConnection.disconnected.connect(clientConnection.deleteLater)
         clientConnection.disconnectFromHost()
+
+        if(data[0] == "start"):
+            return
+        elif(data[0] == "terminate"):
+            return
+        elif(data[0] == "list"):
+            return
+        elif(data[0] == "load"):
+            return
+        elif(data[0] == "restart"):
+            return
+        elif(data[0] == "log"):
+            return
+        elif(data[0] == "front"):
+            return
+        elif(data[0] == "quit"):
+            self.quick_quit()
+            return
+
+        
         
 
     def initServer(self):
@@ -138,8 +157,8 @@ class LauncherTray(QMainWindow):
         help_ = self.context_menu.addAction("Help")
         help_.triggered.connect(self.showHelp)
 
-        quit_ = self.context_menu.addAction("Quit")
-        quit_.triggered.connect(self.quit)
+        self.quit_ = self.context_menu.addAction("Quit")
+        self.quit_.triggered.connect(self.quit)
 
         self.context_menu.aboutToShow.connect(self.prepare_context_menu)
         self.trayicon.setContextMenu(self.context_menu)
@@ -418,6 +437,13 @@ class LauncherTray(QMainWindow):
             logging.info("Tray Launcher Exited.")
             self.script_manager.deleteLater()
             qApp.quit()
+    
+    def quick_quit(self):
+        for timestamp in self.currently_running_scripts.keys():
+            self.script_manager.terminate(timestamp)
+        logging.info("Tray Launcher Exited.")
+        self.script_manager.deleteLater()
+        qApp.quit()
 
     def showLogs(self, log_path):
         """Displays the file specified.

@@ -1,0 +1,1 @@
+activate artiq && python C:\Users\scientist\code\tray-launcher\src\tray_launcher\pyqt5_client.py -s hello
