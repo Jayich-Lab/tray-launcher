@@ -84,9 +84,10 @@ class LauncherTray(QMainWindow):
 
         data = []
         while(not clientConnection.atEnd()):
-            data.append(clientConnection.readLine())
+            data.append(clientConnection.readLine().decode())
         
-        print(data)
+        for i in data:
+            print(i + "\n")
 
         clientConnection.disconnected.connect(clientConnection.deleteLater)
         clientConnection.disconnectFromHost()
@@ -98,7 +99,7 @@ class LauncherTray(QMainWindow):
         address = QHostAddress("127.0.0.1")
         if(not self.server.listen(address, port)):
             logging.warning("Failed to listen to port: " + str(port) + ". See README.md to switch to an available port.")
-            # We want to do more explicit warning
+            # We want to do more explicit warnings
             return
         self.server.newConnection.connect(self.processConnection)
             

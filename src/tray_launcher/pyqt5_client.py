@@ -8,14 +8,14 @@ from PyQt5.QtNetwork import QTcpSocket
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 class Client(QObject):
-    def __init__(self, ap):
+    def __init__(self):
         super().__init__()
         self.client = QTcpSocket(self)
         self.client.connectToHost("127.0.0.1", 7686, QIODevice.ReadWrite)
         self.client.write("Hello".encode())
-        self.client.disconnected.conect(QCoreApplication.quit)
+        self.client.disconnected.connect(QCoreApplication.quit)
 
 if __name__ == "__main__":
     app = QCoreApplication(sys.argv)
-    c = Client(app)
+    c = Client()
     sys.exit(app.exec_())
