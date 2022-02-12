@@ -94,7 +94,7 @@ class LauncherTray(QMainWindow):
 
         #Only the CLIENT can print to the screen, so write to the CLIENT!!
         if(data[0] == "start"):
-            for p in data:
+            for p in data[1:]:
                 file_path = Path(p)
                 if(file_path.is_file()):
                     print("okay, is file.")
@@ -102,7 +102,7 @@ class LauncherTray(QMainWindow):
 
                 else:
                     print("Bad, is not file.")
-                    file_path = self.to_full_path(file_path)
+                    file_path = self.to_loaded_path(file_path)
                     self.run_new_file(file_path)
                     # full_path = self.toFullPath(p)
                     # if(full_path != None):
@@ -141,7 +141,7 @@ class LauncherTray(QMainWindow):
         return
 
     #Should call add_available_scripts() to clear the "scripts" directory
-    def to_full_path(self, str_given, running_flag=False):
+    def to_loaded_path(self, str_given, running_flag=False):
         '''Returns a Path
         '''
         print(str(Path(self.AVAILABLE_SCRIPTS / str_given).with_suffix(".bat")))
@@ -411,13 +411,14 @@ class LauncherTray(QMainWindow):
             ):
                 self.start_new_script(file_path)
         elif (file_path.is_file() and file_path.suffix == ".bat"):
-            self.load_script(file_path)
+            if(self.load_script(file_path)):
+                file_path = self.to_loaded_path(file_path.stem)
 
-            action = QAction(file_path.stem)
-            action.triggered.connect(partial(self.start_new_script, file_path))
-            self.available_scripts[file_path.name] = action
+                action = QAction(file_path.stem)
+                action.triggered.connect(partial(self.start_new_script, file_path))
+                self.available_scripts[file_path.name] = action
 
-            self.start_new_script(file_path)
+                self.start_new_script(file_path)
         else:
             logging.info("Only .bat file is accepted.")
             print("Only .bat file is accepted.")
@@ -444,6 +445,7 @@ class LauncherTray(QMainWindow):
             action.triggered.connect(partial(self.start_new_script, script_path))
             self.view_all.insertAction(self.view_in_directory, action)
             logging.info("{} was loaded to \\scripts.".format(str(script_path)))
+            return True
         else:
             self.resize(1, 1)
             self.showMinimized()
@@ -463,10 +465,12 @@ class LauncherTray(QMainWindow):
                 try:
                     _su.copy(script_path, self.AVAILABLE_SCRIPTS)
                     logging.info("{} was replaced in \\scripts.".format(str(script_path)))
+                    return True
                 except _su.SameFileError:
-                    return
+                    print("Same File!")
+                    return True
             else:
-                return
+                return False
 
     def quit(self):
         self.resize(1, 1)
@@ -548,7 +552,7 @@ def run_pythonw():
     try:
         log_directory = (
             Path.home()
-            / "tray_launcher"
+            / ".tray_launcher"
             / "logs"
             / (str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2))
         )

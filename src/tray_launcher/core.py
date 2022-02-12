@@ -171,12 +171,18 @@ class ChildScript:
         """Checks if there is any subprocess still running."""
         self.update_current_PIDs()
 
-        if self.current_PIDs is None:
+        if self.childScript.poll() is None:
             return True
-        elif self.childScript.poll() is None:
+        elif not (self.current_PIDs is None):
             return True
-
+        
         return False
+        # if self.current_PIDs is None:
+        #     return True
+        # elif self.childScript.poll() is None:
+        #     return True
+
+        # return False
 
     def update_current_PIDs(self):
         self.current_PIDs = []
@@ -191,3 +197,4 @@ class ChildScript:
         for line in wmic_.stdout.split("\n"):
             if line != "" and line.split(" ")[0] != "ProcessId":
                 self.current_PIDs.append(int(line))
+        print(self.current_PIDs)
