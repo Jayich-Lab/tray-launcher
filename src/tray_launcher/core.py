@@ -173,16 +173,9 @@ class ChildScript:
 
         if self.childScript.poll() is None:
             return True
-        elif not (self.current_PIDs is None):
+        elif self.current_PIDs:
             return True
-        
         return False
-        # if self.current_PIDs is None:
-        #     return True
-        # elif self.childScript.poll() is None:
-        #     return True
-
-        # return False
 
     def update_current_PIDs(self):
         self.current_PIDs = []
@@ -197,4 +190,3 @@ class ChildScript:
         for line in wmic_.stdout.split("\n"):
             if line != "" and line.split(" ")[0] != "ProcessId":
                 self.current_PIDs.append(int(line))
-        print(self.current_PIDs)
