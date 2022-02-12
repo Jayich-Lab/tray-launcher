@@ -150,7 +150,7 @@ class ChildScript:
         )
 
         self.childScript_PID = self.childScript.pid
-        print("childScript_PID: " + str(self.childScript_PID))
+        print("childScript_PIDsss: " + str(self.childScript_PID))
 
     def terminate_script(self):
         self.update_current_PIDs()
