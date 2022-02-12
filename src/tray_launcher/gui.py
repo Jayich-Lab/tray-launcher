@@ -331,7 +331,7 @@ class LauncherTray(QMainWindow):
 
         if script_path.is_file() and script_path.suffix == ".bat":
             for existing_file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
-                if existing_file_path == script_path:
+                if existing_file_path.stem == script_path.stem:
                     isDuplicateName = True
                     break
 

@@ -97,16 +97,19 @@ class LauncherTray(QMainWindow):
             for p in data:
                 file_path = Path(p)
                 if(file_path.is_file()):
-                    self.open_script_from_file_dialogue(file_path)  #But we need to write to the client if the file is not valid because of blablabla...
+                    print("okay, is file.")
+                    self.run_new_file(file_path)
 
                 else:
-                    full_path = self.toFullPath(p)
-                    if(full_path != None):
-                        self.start_new_script(full_path)
-                    else:
-                        #Write to the client asking for a valid path
-                        return
-                
+                    print("Bad, is not file.")
+                    file_path = self.to_full_path(file_path)
+                    self.run_new_file(file_path)
+                    # full_path = self.toFullPath(p)
+                    # if(full_path != None):
+                    #     self.start_new_script(full_path)
+                    # else:
+                    #     #Write to the client asking for a valid path
+                    #     return
 
                 # if(self.isLoadedStem(p)):
                 #     self.open_script_from_file_dialogue(self.toFullPath(p))
@@ -138,7 +141,12 @@ class LauncherTray(QMainWindow):
         return
 
     #Should call add_available_scripts() to clear the "scripts" directory
-    def toFullPath(self, str_given, running_flag=False):
+    def to_full_path(self, str_given, running_flag=False):
+        '''Returns a Path
+        '''
+        print(str(Path(self.AVAILABLE_SCRIPTS / str_given).with_suffix(".bat")))
+        return Path(self.AVAILABLE_SCRIPTS / str_given).with_suffix(".bat")
+
         if(not running_flag):
             for existing_file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
                 if existing_file_path.stem == str_given or existing_file_path.name == str_given:
@@ -393,22 +401,26 @@ class LauncherTray(QMainWindow):
         if file_name != "":
             file_path = Path(file_name)
 
-            if (
+            self.run_new_file(file_path)
+
+    def run_new_file(self, file_path):
+        if (
                 file_path.is_file()
                 and file_path.suffix == ".bat"
                 and file_path.parent == self.AVAILABLE_SCRIPTS
             ):
                 self.start_new_script(file_path)
-            elif file_path.is_file() and file_path.suffix == ".bat":
-                self.load_script(file_path)
+        elif (file_path.is_file() and file_path.suffix == ".bat"):
+            self.load_script(file_path)
 
-                action = QAction(file_path.stem)
-                action.triggered.connect(partial(self.start_new_script, file_path))
-                self.available_scripts[file_path.name] = action
+            action = QAction(file_path.stem)
+            action.triggered.connect(partial(self.start_new_script, file_path))
+            self.available_scripts[file_path.name] = action
 
-                self.start_new_script(file_path)
-            else:
-                logging.info("Only .bat file is accepted.")
+            self.start_new_script(file_path)
+        else:
+            logging.info("Only .bat file is accepted.")
+            print("Only .bat file is accepted.")
 
     def load_script(self, script_path):
         """Loads the specified file to the \\scripts directory.
@@ -422,7 +434,7 @@ class LauncherTray(QMainWindow):
 
         if script_path.is_file() and script_path.suffix == ".bat":
             for existing_file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
-                if existing_file_path == script_path:
+                if existing_file_path.stem == script_path.stem:
                     isDuplicateName = True
                     break
 
