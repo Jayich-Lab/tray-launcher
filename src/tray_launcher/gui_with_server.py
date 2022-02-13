@@ -54,7 +54,7 @@ class LauncherTray(QMainWindow):
     available_scripts = {}
 
     def __init__(self):
-        print("Test7")
+        print("Test8")
         self.HOME_PATH = Path(core.__file__).parent
         self.USER = Path.home()
 
@@ -214,7 +214,11 @@ class LauncherTray(QMainWindow):
         Args:
             script_path: Path, path to the script to be started.
         """
-        # self.check_available_scripts()
+
+        ## TO-DO: Need to revise the currently_running_scripts before we're able to do this
+        # if(script_path.stem in self.currently_running_scripts):
+        #     print("Cannot run a script with the same stem as one of the currently running scripts!")
+        #     return
 
         timestamp = _t.time()
         args = (script_path, timestamp)
