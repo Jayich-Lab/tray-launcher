@@ -103,6 +103,7 @@ class ChildScript:
     ENCODING = "utf-8"
 
     script_path_str = ""
+    
     outputs_file = None
 
     childScript = None
@@ -118,7 +119,7 @@ class ChildScript:
         self.LOGS = self.USER_HOME / "logs"
 
     def start_script(self):
-        script_path = Path(self.script_path_str)
+        self.script_path = Path(self.script_path_str)
 
         t = _t.localtime(_t.time())
 
@@ -132,7 +133,7 @@ class ChildScript:
             raise
 
         self.log_path = log_directory / "{}-{}_{}_{}.log".format(
-            script_path.stem,
+            self.script_path.stem,
             str(t.tm_hour).zfill(2),
             str(t.tm_min).zfill(2),
             str(t.tm_sec).zfill(2),

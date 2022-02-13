@@ -10,6 +10,9 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 class TrayLauncherClient(QObject):
     def __init__(self, command, data):
         super().__init__()
+
+        self.blockSize = 0
+
         self.client = QTcpSocket(self)
         self.client.connectToHost("127.0.0.1", 7686, QIODevice.ReadWrite)
         self.client.waitForConnected()
@@ -17,9 +20,27 @@ class TrayLauncherClient(QObject):
         self.client.write(bytes(command + "\n", encoding="ascii"))
 
         for entry in data:
-            self.client.write((entry+ "\n").encode())
+            self.client.write(bytes((entry+ "\n"), encoding="ascii"))
 
+        self.client.readyRead.connect(self.read_from_server)
         self.client.waitForDisconnected()
+    
+
+
+    # Copied from: https://stackoverflow.com/questions/41167409/pyqt5-sending-and-receiving-messages-between-client-and-server
+    def read_from_server(self):
+        instr = QDataStream(self.client)
+        instr.setVersion(QDataStream.Qt_5_0)
+        if self.blockSize == 0:
+            if self.client.bytesAvailable() < 2:
+                return
+            self.blockSize = instr.readUInt16()
+        if self.client.bytesAvailable() < self.blockSize:
+            return
+        # Print response to terminal, we could use it anywhere else we wanted.
+        print(str(instr.readString(), encoding='ascii'))
+
+
 
 def main():
 

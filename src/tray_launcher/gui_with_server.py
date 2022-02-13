@@ -10,10 +10,11 @@ from pathlib import Path
 
 from PyQt5.QtCore import (
     Qt,
+    QByteArray,
     QIODevice,
     QDataStream,
 )
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QCloseEvent
 from PyQt5.QtNetwork import (QHostAddress, QTcpServer,)
 from PyQt5.QtWidgets import (
     QAction,
@@ -44,19 +45,20 @@ class LauncherTray(QMainWindow):
     # Contains all currently_running_scripts
     # currently_running_scripts = {}
 
+
     # key: string:                          script.stem
     # value: tuple (int, QMenu):            (timestamp, three_menu)
     currently_running_scripts = {}            
 
 
     # key: str, value: QAction
-        # key: script.name
+        # key: script.stem
         # value: QAction
     # This is to show up in "Start a Script"
     available_scripts = {}
 
     def __init__(self):
-        print("Test9")
+        print("Test19")
         self.HOME_PATH = Path(core.__file__).parent
         self.USER = Path.home()
 
@@ -71,10 +73,10 @@ class LauncherTray(QMainWindow):
         self.script_manager = core.ChildScriptManager()
         t = _t.localtime(_t.time())
         try:
-            log_directory = self.LOGS / (
+            self._log_directory = self.LOGS / (
                 str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2)
             )
-            log_directory.mkdir(parents=True, exist_ok=True)
+            self._log_directory.mkdir(parents=True, exist_ok=True)
         except Exception as err:
             print(err + ": Failed to create new directory for outputs")
             raise
@@ -85,13 +87,42 @@ class LauncherTray(QMainWindow):
             print(err + ": Failed to create new directory for available scripts")
             raise
         logging.basicConfig(
-            filename=log_directory / "tray_launcher.log",
+            filename=self._log_directory / "tray_launcher.log",
             level=logging.INFO,
             format="%(asctime)s %(message)s",
         )
         logging.info("Tray Launcher Started.")
         self.initUI()
         self.initServer()
+
+
+
+    # Copied from: https://stackoverflow.com/questions/41167409/pyqt5-sending-and-receiving-messages-between-client-and-server
+    def write_to_client(self, connection):
+        if(not self.message_to_client):
+            return
+
+        message = "\n".join(self.message_to_client)
+        self.message_to_client = []
+        
+        # instantiate a QByteArray
+        block = QByteArray()
+        # QDataStream class provides serialization of binary data to a QIODevice
+        out = QDataStream(block, QIODevice.ReadWrite)
+        # We are using PyQt5 so set the QDataStream version accordingly.
+        out.setVersion(QDataStream.Qt_5_0)
+        out.writeUInt16(0)
+        message = bytes(message, encoding='ascii')
+        # now use the QDataStream and write the byte array to it.
+        out.writeString(message)
+        out.device().seek(0)
+        out.writeUInt16(block.size() - 2)
+        # now send the QByteArray.
+        connection.write(block)
+
+        
+
+
 
     def processConnection(self):
         clientConnection = self.server.nextPendingConnection()
@@ -104,57 +135,137 @@ class LauncherTray(QMainWindow):
 
         print(data)
 
-        clientConnection.disconnected.connect(clientConnection.deleteLater)
-        clientConnection.disconnectFromHost()
-
-
-        #Only the CLIENT can print to the screen, so write to the CLIENT!!
         if(data[0] == "start"):
             for p in data[1:]:
-                file_path = Path(p)
-                if(not (self.run_new_file(file_path) or self.run_new_file(self.to_loaded_path(file_path)))):
-                    ## TO-DO: write to the client saying that p is not valid. "Only .bat file is accepted."
-                    print("Bad")
-                
+                file_path = self.to_loaded_path(Path(p))
+                if(not (file_path is None)):
+                    if(self.run_new_file(file_path)):
+                        self.message_to_client.append("SUCCESS: {} is now running.".format(p))
+                    else:
+                        self.message_to_client.append("{} is not valid. Only .bat files are accepted.".format(p))
+                else:
+                    self.message_to_client.append("{} is not valid.".format(p))
 
         elif(data[0] == "terminate"):
             for p in data[1:]:
-                full_path = self.toFullPath(p, True)
-                if(full_path != None):
-                    self.terminate_script() #Add those arguments. IMPORTANT: we might not have the info needed, so we have to change some old codes to preserve the info we need here: like which menu is associated with each childScript
+                file_path = self.to_loaded_path(Path(p))
+                if(not (file_path is None)):
+                    if(file_path.is_file() and file_path.parent == self.AVAILABLE_SCRIPTS and file_path.stem in self.currently_running_scripts):
+                        self.terminate_script(((file_path, self.currently_running_scripts[file_path.stem][0]), self.currently_running_scripts[file_path.stem][1]))
+                        self.message_to_client.append("SUCCESS: {} is now terminated.".format(p))
+                    elif(file_path.is_file() and file_path.parent == self.AVAILABLE_SCRIPTS):
+                        self.message_to_client.append("{} is not running.".format(p))
+                    else:
+                        self.message_to_client.append("{} is not valid.".format(p))
                 else:
-                    #Write to the CLIENT saying that the requested script is not running
-                    return
+                    self.message_to_client.append("{} is not valid.".format(p))
+
+        # Maybe we wish to have another optional argument to specify that we only want to see currently running scripts
+        # I don't know how to do that yet TO-DO:
         elif(data[0] == "list"):
-            self.check_available_scripts()
-            return
+            self.available_scripts.clear()
+            self.view_all.clear()
+
+            for file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
+                if file_path.is_file() and file_path.suffix == ".bat":
+                    st = file_path.stem
+
+                    action = self.view_all.addAction(st)
+                    action.triggered.connect(partial(self.start_new_script, file_path))
+                    self.available_scripts[st] = action
+
+                    if st in self.currently_running_scripts:
+                        self.available_scripts[st].setIcon(QIcon(self.check_mark))
+                        self.available_scripts[st].setEnabled(False)
+                        
+                        # TO-DO: How to properly format this output? i.e., how many \t to use?
+                        self.message_to_client.append("{} \t \t \t \t \t \t(currently-running)".format(st))
+                    else:
+                        self.message_to_client.append("{}".format(st))
+                else:
+                    if file_path.is_file:
+                        file_path.unlink()
+
         elif(data[0] == "load"):
-            return
+            for p in data[1:]:
+                file_path = Path(p)
+                if(not (self.load_script(file_path))):
+                    self.message_to_client.append("{} is not loaded. (Only .bat file is accepted)".format(p))
+                else:
+                    self.message_to_client.append("SUCCESS: {} is loaded.".format(p))
+
         elif(data[0] == "restart"):
-            return
+            for p in data[1:]:
+                file_path = self.to_loaded_path(Path(p))
+                if(not (file_path is None)):
+                    if(file_path.is_file() and file_path.parent == self.AVAILABLE_SCRIPTS and file_path.stem in self.currently_running_scripts):
+                        self.restart_script(((file_path, self.currently_running_scripts[file_path.stem][0]), self.currently_running_scripts[file_path.stem][1]))
+                        self.message_to_client.append("SUCCESS: {} is restarted.".format(p))
+                    elif(file_path.is_file() and file_path.parent == self.AVAILABLE_SCRIPTS):
+                        self.message_to_client.append("{} is not running.".format(p))
+                    else:
+                        self.message_to_client.append("{} is not valid.".format(p))
+                else:
+                    self.message_to_client.append("{} is not valid.".format(p))
+
         elif(data[0] == "log"):
-            return
+            for p in data[1:]:
+                #So if you run a script named tray-launcher, it would be super confused. haha
+                if(p == "tray-launcher"):
+                    self.show_logs(self._log_directory / "tray_launcher.log")
+                    self.message_to_client.append("SUCCESS: Log of this tray launcher is shown.")
+                else:
+                    file_path = self.to_loaded_path(Path(p))
+                    if(not (file_path is None)):
+                        if(file_path.is_file() and file_path.parent == self.AVAILABLE_SCRIPTS and file_path.stem in self.currently_running_scripts):
+                            self.show_logs(self.script_manager.currently_running_ChildScripts[self.currently_running_scripts[file_path.stem][0]].log_path)
+                            self.message_to_client.append("SUCCESS: log of {} is shown.".format(p))
+                        elif(file_path.is_file() and file_path.parent == self.AVAILABLE_SCRIPTS):
+                            self.message_to_client.append("{} is not running.".format(p))
+                        else:
+                            self.message_to_client.append("{} is not valid.".format(p))
+                    else:
+                        self.message_to_client.append("{} is not valid.".format(p))
+
         elif(data[0] == "front"):
-            return
+            for p in data[1:]:
+                file_path = self.to_loaded_path(Path(p))
+                if(not (file_path is None)):
+                    if(file_path.is_file() and file_path.parent == self.AVAILABLE_SCRIPTS and file_path.stem in self.currently_running_scripts):
+                        self.show_script((file_path, self.currently_running_scripts[file_path.stem][0]))
+                        self.message_to_client.append("SUCCESS: {} is now brought to the front.".format(p))
+                    elif(file_path.is_file() and file_path.parent == self.AVAILABLE_SCRIPTS):
+                        self.message_to_client.append("{} is not running.".format(p))
+                    else:
+                        self.message_to_client.append("{} is not valid.".format(p))
+                else:
+                    self.message_to_client.append("{} is not valid.".format(p))
         elif(data[0] == "quit"):
             self.quick_quit()
-            return
-
-    #This is gonna be used in start_new_script(). No duplicate (even names) is allowed
-    def isCurrentlyRunning(self, script_path):
-        return
+        
+        self.write_to_client(clientConnection)
+        clientConnection.disconnected.connect(clientConnection.deleteLater)
+        clientConnection.disconnectFromHost()
 
     #Should call add_available_scripts() to clear the "scripts" directory
-    def to_loaded_path(self, str_given):
-        '''Returns a Path
+    def to_loaded_path(self, path_given):
+        '''Returns a Path that resembles one pointing to the "scripts" directory
+
+        Args:
+            path_given: Path
         '''
-        print(str(Path(self.AVAILABLE_SCRIPTS / str_given).with_suffix(".bat")))
-        return Path(self.AVAILABLE_SCRIPTS / str_given).with_suffix(".bat")
+        try:
+            loaded_path = Path(self.AVAILABLE_SCRIPTS / path_given).with_suffix(".bat")
+        except ValueError:
+            return None
+        return loaded_path
 
 
 
 
     def initServer(self):
+        self.message_to_client = []
+
         self.server = QTcpServer(self)
         port = int(os.environ.get("TRAY_LAUNCHER_PORT", 7686))
         address = QHostAddress("127.0.0.1")
@@ -216,9 +327,10 @@ class LauncherTray(QMainWindow):
         Args:
             script_path: Path, path to the script to be started.
         """
+        self.prepare_context_menu()
 
         if(script_path.stem in self.currently_running_scripts):
-            # TO-DO: write to the client as well
+            self.message_to_client.append("Cannot run a script with the same stem as one of the currently running scripts!")
             print("Cannot run a script with the same stem as one of the currently running scripts!")
             return
 
@@ -315,7 +427,7 @@ class LauncherTray(QMainWindow):
         """Restarts a script.
 
         Args:
-            args: ((str, int), QMenu), the path to the script, the timestamp of the ChildScript,
+            args: ((Path, int), QMenu), the path to the script, the timestamp of the ChildScript,
                 and the QMenu associated with this script.
         """
         self.terminate_script(args)
@@ -347,16 +459,15 @@ class LauncherTray(QMainWindow):
 
         for file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
             if file_path.is_file() and file_path.suffix == ".bat":
-                action = target_menu.addAction(file_path.stem)
-                action.triggered.connect(partial(self.start_new_script, file_path))
-                self.available_scripts[file_path.stem] = action
+                st = file_path.stem
 
-                #for menu in self.currently_running_scripts.values():
-                for entry in self.currently_running_scripts.values():
-                    menu = entry[1]
-                    if file_path.stem == menu.menuAction().text():
-                        self.available_scripts[file_path.stem].setIcon(QIcon(self.check_mark))
-                        self.available_scripts[file_path.stem].setEnabled(False)
+                action = target_menu.addAction(st)
+                action.triggered.connect(partial(self.start_new_script, file_path))
+                self.available_scripts[st] = action
+
+                if st in self.currently_running_scripts:
+                    self.available_scripts[st].setIcon(QIcon(self.check_mark))
+                    self.available_scripts[st].setEnabled(False)
             else:
                 if file_path.is_file:
                     file_path.unlink()
@@ -372,6 +483,7 @@ class LauncherTray(QMainWindow):
         )
         self.view_all.addAction(self.view_in_directory)
 
+    #Perhaps I'm using this too frequently that the program suffers from longer lagging, for the sake that some scripts may exit abnormally
     def prepare_context_menu(self):
         """Checks if scripts are still running; if not, remove them from the menu.
         Also rebuilds the the view_all menu    
@@ -438,15 +550,13 @@ class LauncherTray(QMainWindow):
         Args: 
             file_path: Path
         '''
-        print(file_path)
-        
-        if(not (file_path.is_file() and file_path.suffix == ".bat")):
+
+        if(not (file_path.is_file())):
             logging.info("Only .bat file is accepted.")
             print("Only .bat file is accepted.")
             return False
 
         elif (file_path.parent == self.AVAILABLE_SCRIPTS):
-                self.check_available_scripts()
                 self.start_new_script(file_path)
                 return True
         else:
@@ -478,43 +588,45 @@ class LauncherTray(QMainWindow):
                     isDuplicateName = True
                     break
 
-        if not isDuplicateName:
-            _su.copy(script_path, self.AVAILABLE_SCRIPTS)
+            if not isDuplicateName:
+                _su.copy(script_path, self.AVAILABLE_SCRIPTS)
 
-            # # It is strange that I didn't add to __available_scripts__ dict here
-            # action = QAction(script_path.stem, self)
-            # action.triggered.connect(partial(self.start_new_script, script_path))
-            # self.view_all.insertAction(self.view_in_directory, action)  #But, is this "action" in __available_scripts__ dict?
-            # #
+                # # It is strange that I didn't add to __available_scripts__ dict here
+                # action = QAction(script_path.stem, self)
+                # action.triggered.connect(partial(self.start_new_script, script_path))
+                # self.view_all.insertAction(self.view_in_directory, action)  #But, is this "action" in __available_scripts__ dict?
+                # #
 
-            logging.info("{} was loaded to \\scripts.".format(str(script_path)))
-            self.check_available_scripts()
-            return True
-        else:
-            self.resize(1, 1)
-            self.showMinimized()
-            self.showMaximized()
-            self.resize(0, 0)
-            b = QMessageBox()
-            b.setWindowFlag(Qt.WindowStaysOnTopHint)
-            replace_reply = b.question(
-                self,
-                "Replace File",
-                "A file named {} already exists in "
-                "\\scripts. Do you want to replace it?".format(script_path.name),
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No,
-            )
-            if replace_reply == QMessageBox.Yes:
-                try:
-                    _su.copy(script_path, self.AVAILABLE_SCRIPTS)
-                    logging.info("{} was replaced in \\scripts.".format(str(script_path)))
-                    self.check_available_scripts()
-                    return True
-                except _su.SameFileError:
-                    print("Same File!")
-                    return True
+                logging.info("{} was loaded to \\scripts.".format(str(script_path)))
+                self.prepare_context_menu()
+                return True
             else:
+                self.resize(1, 1)
+                self.showMinimized()
+                self.showMaximized()
+                self.resize(0, 0)
+                b = QMessageBox()
+                b.setWindowFlag(Qt.WindowStaysOnTopHint)
+                replace_reply = b.question(
+                    self,
+                    "Replace File",
+                    "A file named {} already exists in "
+                    "\\scripts. Do you want to replace it?".format(script_path.name),
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No,
+                )
+                if replace_reply == QMessageBox.Yes:
+                    try:
+                        _su.copy(script_path, self.AVAILABLE_SCRIPTS)
+                        logging.info("{} was replaced in \\scripts.".format(str(script_path)))
+                        self.prepare_context_menu()
+                        return True
+                    except _su.SameFileError:
+                        print("Same File!")
+                        return True
+                else:
+                    return False
+        else:
                 return False
 
     def quit(self):
@@ -560,6 +672,13 @@ class LauncherTray(QMainWindow):
         logging.info("Logs {} were opened.".format(log_path))
         os.startfile(log_path)
 
+    # This is needed in case the tray launcher is quitted abnormally
+    # Some repetition may occur, but that's no matter
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        print("Tray Launcher out.")
+        self.quick_quit()
+        return super().closeEvent(a0)
+
     def show_help(self):
         """Displays a Help window in the middle of the screen"""
         self.help_window = QWidget()
@@ -590,7 +709,6 @@ def main():
     app.setStyle("Fusion")
     lc = LauncherTray()
     lc.show()
-    
     sys.exit(app.exec_())
 
     
