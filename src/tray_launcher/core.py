@@ -20,8 +20,8 @@ from win32process import GetWindowThreadProcessId
 class ChildScriptManager(QObject):
     # key: int, value: ChildScript
 
-        # key: timestamp
-        # value: ChildScript
+    # key: timestamp
+    # value: ChildScript
     currently_running_ChildScripts = {}
 
     def __init__(self):
@@ -103,7 +103,7 @@ class ChildScript:
     ENCODING = "utf-8"
 
     script_path_str = ""
-    
+
     outputs_file = None
 
     childScript = None
