@@ -4,7 +4,7 @@
 
 A launcher resided in the task bar for managing .bat scripts.
 
-## New: Now you can access tray launcher with cmd! `tray-launcher`, then `launcher -h` to learn how our CLI works. ##
+## New: Tray launcher is now coming with CLI! `tray-launcher`, then `launcher -h` to learn how it works. ##
 
 ## Installation
 
