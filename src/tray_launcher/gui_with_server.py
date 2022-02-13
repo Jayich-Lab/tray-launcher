@@ -54,7 +54,7 @@ class LauncherTray(QMainWindow):
     available_scripts = {}
 
     def __init__(self):
-        print("Test3")
+        print("Test4")
         self.HOME_PATH = Path(core.__file__).parent
         self.USER = Path.home()
 
@@ -429,11 +429,11 @@ class LauncherTray(QMainWindow):
             if(self.load_script(file_path)):
                 file_path = self.to_loaded_path(file_path.stem)     #repetition, extra step. See the function calling run_new_file
 
-                #
-                action = QAction(file_path.stem, self)    #Why don't you have ,self) ?
-                action.triggered.connect(partial(self.start_new_script, file_path))
-                self.available_scripts[file_path.name] = action
-                #
+                # #
+                # action = QAction(file_path.stem, self)    #This "self" was not here
+                # action.triggered.connect(partial(self.start_new_script, file_path))
+                # self.available_scripts[file_path.name] = action
+                # #
 
                 self.start_new_script(file_path)
         else:
