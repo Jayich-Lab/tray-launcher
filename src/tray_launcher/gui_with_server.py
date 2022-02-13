@@ -54,7 +54,7 @@ class LauncherTray(QMainWindow):
     available_scripts = {}
 
     def __init__(self):
-        print("Test4")
+        print("Test7")
         self.HOME_PATH = Path(core.__file__).parent
         self.USER = Path.home()
 
@@ -129,7 +129,7 @@ class LauncherTray(QMainWindow):
                 #     self.open_script_from_file_dialogue(self.toFullPath(p))
             return
         elif(data[0] == "terminate"):
-            for p in data:
+            for p in data[1:]:
                 full_path = self.toFullPath(p, True)
                 if(full_path != None):
                     self.terminate_script() #Add those arguments. IMPORTANT: we might not have the info needed, so we have to change some old codes to preserve the info we need here: like which menu is associated with each childScript
@@ -137,6 +137,7 @@ class LauncherTray(QMainWindow):
                     #Write to the CLIENT saying that the requested script is not running
                     return
         elif(data[0] == "list"):
+            self.check_available_scripts()
             return
         elif(data[0] == "load"):
             return
@@ -147,7 +148,7 @@ class LauncherTray(QMainWindow):
         elif(data[0] == "front"):
             return
         elif(data[0] == "quit"):
-            self.quickQuit()
+            self.quick_quit()
             return
 
     #This is gonna be used in start_new_script(). No duplicate (even names) is allowed
@@ -194,7 +195,7 @@ class LauncherTray(QMainWindow):
 
         self.view_all = QMenu("Start a Script", self)
         self.add_available_scripts(self.view_all)
-        self.view_all.aboutToShow.connect(self.check_available_scripts)
+        # self.view_all.aboutToShow.connect(self.check_available_scripts)
 
         self.view_in_directory = self.view_all.addAction("[View in Directory]")
         self.view_in_directory.triggered.connect(
@@ -213,16 +214,18 @@ class LauncherTray(QMainWindow):
         self.context_menu.addAction(load_new_script)
 
         logs = self.context_menu.addAction("All Logs")
-        logs.triggered.connect(partial(self.showLogs, self.LOGS))
+        logs.triggered.connect(partial(self.show_logs, self.LOGS))
 
         help_ = self.context_menu.addAction("Help")
-        help_.triggered.connect(self.showHelp)
+        help_.triggered.connect(self.show_help)
 
         self.quit_ = self.context_menu.addAction("Quit")
         self.quit_.triggered.connect(self.quit)
 
         self.context_menu.aboutToShow.connect(self.prepare_context_menu)
         self.trayicon.setContextMenu(self.context_menu)
+
+        self.check_available_scripts()
         self.show()
         super().resize(0, 0)
         self.trayicon.show()
@@ -233,6 +236,7 @@ class LauncherTray(QMainWindow):
         Args:
             script_path: Path, path to the script to be started.
         """
+        # self.check_available_scripts()
 
         timestamp = _t.time()
         args = (script_path, timestamp)
@@ -260,7 +264,7 @@ class LauncherTray(QMainWindow):
         logAction = QAction("Log", self)
         logAction.triggered.connect(
             partial(
-                self.showLogs,
+                self.show_logs,
                 self.script_manager.currently_running_ChildScripts[timestamp].log_path,
             )
         )
@@ -270,7 +274,7 @@ class LauncherTray(QMainWindow):
         self.currently_running_scripts[timestamp] = three_menu
 
         three_menu.menuAction().setIcon(QIcon(self.check_mark))
-        self.available_scripts[script_path.name].setEnabled(False)
+        self.available_scripts[script_path.stem].setEnabled(False)
 
     def show_script(self, args):
         """Bring windows associated with a script to the foreground, if any.
@@ -294,19 +298,29 @@ class LauncherTray(QMainWindow):
             args: ((Path, int), QMenu), the path to the script,
                 the timestamp of the ChildScript, and the QMenu associated with this script.
         """
-        self.run_in_manager(args[0][1], self.script_manager.terminate)
-        self.context_menu.removeAction(args[1].menuAction())
-        del self.currently_running_scripts[args[0][1]]
+        if(args[0][1] in self.currently_running_scripts):
+            self.run_in_manager(args[0][1], self.script_manager.terminate)
+            self.context_menu.removeAction(args[1].menuAction())
+            del self.currently_running_scripts[args[0][1]]
 
-        self.script_count -= 1
+            self.script_count -= 1
 
-        if self.script_count == 0:
-            self.none_currently_running.setVisible(True)
+            if self.script_count == 0:
+                self.none_currently_running.setVisible(True)
 
-        self.available_scripts[(args[0][0]).name].setIcon(QIcon())
-        self.available_scripts[(args[0][0]).name].setEnabled(True)
+            # There was a bug associated with "deleting a file from the "scripts" directory when the file is running, then terminating this file", when without this if condition
+            # The error:   in terminate_script self.available_scripts[(args[0][0]).name].setIcon(QIcon()) RuntimeError: wrapped C/C++ object of type QAction has been deleted
 
-        logging.info("{} was terminated through Tray Launcher.".format(args[0][0].stem))
+            # I thought adding this if condition would help, but after I added self.check_available_scripts() in load() and prepare_context_menu(), 
+            # this bug disappeared even without the if. But for safety, I will keep it here.
+            if((args[0][0]).stem in self.available_scripts):
+                self.available_scripts[(args[0][0]).stem].setIcon(QIcon())
+                self.available_scripts[(args[0][0]).stem].setEnabled(True)
+
+            logging.info("{} was terminated through Tray Launcher.".format(args[0][0].stem))
+
+        else:
+            print("{} is not running.".format(args[0][0].stem))
 
     def restart_script(self, args):
         """Restarts a script.
@@ -331,22 +345,26 @@ class LauncherTray(QMainWindow):
         dummy_action.triggered.connect(partial(func, args))
         dummy_action.trigger()
 
+    # This is an important reset method. Coordinate with this
     def add_available_scripts(self, target_menu):
         """Loads all .bat files in the \\scripts directory to the menu specified.
 
         Args:
             target_menu: QMenu, the menu to be loaded with .bat file stems.
         """
+        self.available_scripts.clear()
+        target_menu.clear()
+
         for file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
             if file_path.is_file() and file_path.suffix == ".bat":
                 action = target_menu.addAction(file_path.stem)
                 action.triggered.connect(partial(self.start_new_script, file_path))
-                self.available_scripts[file_path.name] = action
+                self.available_scripts[file_path.stem] = action
 
                 for menu in self.currently_running_scripts.values():
                     if file_path.stem == menu.menuAction().text():
-                        self.available_scripts[file_path.name].setIcon(QIcon(self.check_mark))
-                        self.available_scripts[file_path.name].setEnabled(False)
+                        self.available_scripts[file_path.stem].setIcon(QIcon(self.check_mark))
+                        self.available_scripts[file_path.stem].setEnabled(False)
             else:
                 if file_path.is_file:
                     file_path.unlink()
@@ -354,8 +372,6 @@ class LauncherTray(QMainWindow):
     # When loaded scripts abount, this function may cost a more significant amount of time
     def check_available_scripts(self):
         """Reloads .bat files in the \\scripts directory to the view_all menu"""
-        self.view_all.clear()
-
         self.add_available_scripts(self.view_all)
 
         self.view_in_directory = QAction("[View in Directory]", self)
@@ -365,7 +381,9 @@ class LauncherTray(QMainWindow):
         self.view_all.addAction(self.view_in_directory)
 
     def prepare_context_menu(self):
-        """Checks if scripts are still running; if not, remove them from the menu."""
+        """Checks if scripts are still running; if not, remove them from the menu.
+        Also rebuilds the the view_all menu    
+        """
         to_del = []
         for timestamp, child_script in self.script_manager.currently_running_ChildScripts.items():
             if not child_script.is_active():
@@ -388,6 +406,8 @@ class LauncherTray(QMainWindow):
 
         for ts in to_del:
             del self.script_manager.currently_running_ChildScripts[ts]
+
+        self.check_available_scripts()
 
     def load_scripts_from_file_dialogue(self, dir):
         """
@@ -424,17 +444,17 @@ class LauncherTray(QMainWindow):
                 and file_path.suffix == ".bat"
                 and file_path.parent == self.AVAILABLE_SCRIPTS
             ):
+                self.check_available_scripts()
                 self.start_new_script(file_path)
         elif (file_path.is_file() and file_path.suffix == ".bat"):
             if(self.load_script(file_path)):
-                file_path = self.to_loaded_path(file_path.stem)     #repetition, extra step. See the function calling run_new_file
+                file_path = self.to_loaded_path(file_path.stem)
 
                 # #
                 # action = QAction(file_path.stem, self)    #This "self" was not here
                 # action.triggered.connect(partial(self.start_new_script, file_path))
                 # self.available_scripts[file_path.name] = action
                 # #
-
                 self.start_new_script(file_path)
         else:
             logging.info("Only .bat file is accepted.")
@@ -459,13 +479,14 @@ class LauncherTray(QMainWindow):
         if not isDuplicateName:
             _su.copy(script_path, self.AVAILABLE_SCRIPTS)
 
-            # It is strange that I didn't add to __available_scripts__ dict here
-            action = QAction(script_path.stem, self)
-            action.triggered.connect(partial(self.start_new_script, script_path))
-            self.view_all.insertAction(self.view_in_directory, action)  #But, is this "action" in __available_scripts__ dict?
-            #
+            # # It is strange that I didn't add to __available_scripts__ dict here
+            # action = QAction(script_path.stem, self)
+            # action.triggered.connect(partial(self.start_new_script, script_path))
+            # self.view_all.insertAction(self.view_in_directory, action)  #But, is this "action" in __available_scripts__ dict?
+            # #
 
             logging.info("{} was loaded to \\scripts.".format(str(script_path)))
+            self.check_available_scripts()
             return True
         else:
             self.resize(1, 1)
@@ -486,6 +507,7 @@ class LauncherTray(QMainWindow):
                 try:
                     _su.copy(script_path, self.AVAILABLE_SCRIPTS)
                     logging.info("{} was replaced in \\scripts.".format(str(script_path)))
+                    self.check_available_scripts()
                     return True
                 except _su.SameFileError:
                     print("Same File!")
@@ -514,14 +536,14 @@ class LauncherTray(QMainWindow):
             self.script_manager.deleteLater()
             qApp.quit()
     
-    def quickQuit(self):
+    def quick_quit(self):
         for timestamp in self.currently_running_scripts.keys():
             self.script_manager.terminate(timestamp)
         logging.info("Tray Launcher Exited.")
         self.script_manager.deleteLater()
         qApp.quit()
 
-    def showLogs(self, log_path):
+    def show_logs(self, log_path):
         """Displays the file specified.
 
         Args:
@@ -530,7 +552,7 @@ class LauncherTray(QMainWindow):
         logging.info("Logs {} were opened.".format(log_path))
         os.startfile(log_path)
 
-    def showHelp(self):
+    def show_help(self):
         """Displays a Help window in the middle of the screen"""
         self.help_window = QWidget()
         self.help_window.resize(100, 100)
