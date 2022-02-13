@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import os
 import shutil as _su
@@ -88,7 +87,7 @@ class LauncherTray(QMainWindow):
         self.initUI()
         self.initServer()
 
-    # Copied from: https://stackoverflow.com/questions/41167409/pyqt5-sending-and-receiving-messages-between-client-and-server
+    # Copied from
     def write_to_client(self, connection):
         if not self.message_to_client:
             return
@@ -158,8 +157,6 @@ class LauncherTray(QMainWindow):
                 else:
                     self.message_to_client.append("{} is not valid.".format(p))
 
-        # Maybe we wish to have another optional argument to specify that we only want to see currently running scripts
-        # I don't know how to do that yet TO-DO:
         elif data[0] == "list":
             self.available_scripts.clear()
             self.view_all.clear()
@@ -460,10 +457,14 @@ class LauncherTray(QMainWindow):
             if self.script_count == 0:
                 self.none_currently_running.setVisible(True)
 
-            # There was a bug associated with "deleting a file from the "scripts" directory when the file is running, then terminating this file", when without this if condition
-            # The error:   in terminate_script self.available_scripts[(args[0][0]).name].setIcon(QIcon()) RuntimeError: wrapped C/C++ object of type QAction has been deleted
+            # There was a bug associated with "deleting a file from the "scripts" directory
+            # when the file is running, then terminating this file", when without this if condition
 
-            # I thought adding this if condition would help, but after I added self.check_available_scripts() in load() and prepare_context_menu(),
+            # In terminate_script self.available_scripts[(args[0][0]).name].setIcon(QIcon())
+            # RuntimeError: wrapped C/C++ object of type QAction has been deleted
+
+            # I thought adding this if condition would help, but after
+            # I added self.check_available_scripts() in load() and prepare_context_menu(),
             # this bug disappeared even without the if. But for safety, I will keep it here.
             if (args[0][0]).stem in self.available_scripts:
                 self.available_scripts[(args[0][0]).stem].setIcon(QIcon())
@@ -534,7 +535,8 @@ class LauncherTray(QMainWindow):
         )
         self.view_all.addAction(self.view_in_directory)
 
-    # Perhaps I'm using this too frequently that the program suffers from longer lagging, for the sake that some scripts may exit abnormally
+    # Perhaps I'm using this too frequently that the program suffers from longer lagging,
+    # for the sake that some scripts may exit abnormally
     def prepare_context_menu(self):
         """Checks if scripts are still running; if not, remove them from the menu.
         Also rebuilds the the view_all menu
@@ -644,7 +646,8 @@ class LauncherTray(QMainWindow):
                 # # It is strange that I didn't add to __available_scripts__ dict here
                 # action = QAction(script_path.stem, self)
                 # action.triggered.connect(partial(self.start_new_script, script_path))
-                # self.view_all.insertAction(self.view_in_directory, action)  #But, is this "action" in __available_scripts__ dict?
+                # self.view_all.insertAction(self.view_in_directory, action)
+                # #But, is this "action" in __available_scripts__ dict?
                 # #
 
                 logging.info("{} was loaded to \\scripts.".format(str(script_path)))

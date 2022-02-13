@@ -1,11 +1,7 @@
 import argparse
-import asyncio
-import os
-import sys
 
-from PyQt5.QtCore import QCoreApplication, QDataStream, QIODevice, QObject
+from PyQt5.QtCore import QDataStream, QIODevice, QObject
 from PyQt5.QtNetwork import QTcpSocket
-from PyQt5.QtWidgets import QApplication, QMainWindow
 
 
 class TrayLauncherClient(QObject):
@@ -26,7 +22,7 @@ class TrayLauncherClient(QObject):
         self.client.readyRead.connect(self.read_from_server)
         self.client.waitForDisconnected()
 
-    # Copied from: https://stackoverflow.com/questions/41167409/pyqt5-sending-and-receiving-messages-between-client-and-server
+    # Copied from
     def read_from_server(self):
         instr = QDataStream(self.client)
         instr.setVersion(QDataStream.Qt_5_0)
@@ -49,7 +45,9 @@ def main():
 
     parser.add_argument(
         "-s", "--start", nargs="*", metavar="script_stem", type=str, help="Start new script(s)."
-    )  # Be able to start multiple scripts in one command line. Exhibit same behavior as if "View in Directory" so can add new scripts to the "scripts"
+    )
+    # Be able to start multiple scripts in one command line.
+    # Exhibit same behavior as if "View in Directory" so can add new scripts to the "scripts"
 
     parser.add_argument(
         "-t",
@@ -87,7 +85,9 @@ def main():
         metavar="script_stem",
         type=str,
         help="View log of the specified script.",
-    )  # This specified script has to be running. If no additional argument is given, do "View All". If parser.log=="tray_launcher", show self logs.
+    )
+    # This specified script has to be running. If no additional argument is given, do "View All".
+    # If parser.log=="tray_launcher", show self logs.
 
     parser.add_argument(
         "-f",
@@ -102,39 +102,39 @@ def main():
 
     args = parser.parse_args()
 
-    if args.load != None:
+    if args.load is not None:
         print("Loading {}.".format(args.load))
         TrayLauncherClient("load", args.load)
 
-    if args.start != None:
+    if args.start is not None:
         print("Starting {}.".format(args.start))
         TrayLauncherClient("start", args.start)
 
-    if args.log != None:
+    if args.log is not None:
         print("Showing log of {}.".format(args.log))
         TrayLauncherClient("log", args.log)
 
-    if args.restart != None:
+    if args.restart is not None:
         print("Restarting {}.".format(args.restart))
         TrayLauncherClient("restart", args.restart)
 
-    if args.front != None:
+    if args.front is not None:
         print("Bringing {} to the foreground.".format(args.front))
         TrayLauncherClient("front", args.front)
 
-    if args.terminate != None:
+    if args.terminate is not None:
         print("Terminating {}.".format(args.terminate))
         TrayLauncherClient("terminate", args.terminate)
 
-    if args.list == True:
+    if args.list is True:
         print("Available scripts: ")
         TrayLauncherClient("list", [])
 
-    if args.list_current == True:
+    if args.list_current is True:
         print("Currently running scripts: ")
         TrayLauncherClient("list_current", [])
 
-    if args.quit == True:
+    if args.quit is True:
         print("Quitting tray launcher.")
         TrayLauncherClient("quit", [])
 

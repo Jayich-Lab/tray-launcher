@@ -160,7 +160,8 @@ class ChildScript:
         self.update_current_PIDs()
         try:
 
-            # TO-DO: Might be good to put this in loggings? Shouldn't be too hard because we where the logging is is fixed
+            # TO-DO: Might be good to put this in loggings?
+            # Shouldn't be too hard because we where the logging is is fixed
             for pid in self.current_PIDs:
                 subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)])
         except Exception:
