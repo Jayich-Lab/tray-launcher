@@ -42,11 +42,11 @@ class LauncherTray(QMainWindow):
         # key: timestamp
         # value: three_menu QMenu, which contains four actions haha
     # Contains all currently_running_scripts
-    currently_running_scripts = {}
+    # currently_running_scripts = {}
 
     # key: string:                          script.stem
     # value: tuple (int, QMenu):            (timestamp, three_menu)
-    _currently_running_scripts = {}            
+    currently_running_scripts = {}            
 
 
     # key: str, value: QAction
@@ -56,7 +56,7 @@ class LauncherTray(QMainWindow):
     available_scripts = {}
 
     def __init__(self):
-        print("Test8")
+        print("Test9")
         self.HOME_PATH = Path(core.__file__).parent
         self.USER = Path.home()
 
@@ -217,9 +217,10 @@ class LauncherTray(QMainWindow):
             script_path: Path, path to the script to be started.
         """
 
-        # if(script_path.stem in self.currently_running_scripts):
-        #     print("Cannot run a script with the same stem as one of the currently running scripts!")
-        #     return
+        if(script_path.stem in self.currently_running_scripts):
+            # TO-DO: write to the client as well
+            print("Cannot run a script with the same stem as one of the currently running scripts!")
+            return
 
         timestamp = _t.time()
         args = (script_path, timestamp)
@@ -255,8 +256,8 @@ class LauncherTray(QMainWindow):
 
         self.context_menu.insertMenu(self.bottom_separator, three_menu)
 
-        #self.currently_running_scripts[script_path.stem] = (timestamp, three_menu)
-        self.currently_running_scripts[timestamp] = three_menu
+        self.currently_running_scripts[script_path.stem] = (timestamp, three_menu)
+        # self.currently_running_scripts[timestamp] = three_menu
 
         three_menu.menuAction().setIcon(QIcon(self.check_mark))
         self.available_scripts[script_path.stem].setEnabled(False)
@@ -283,13 +284,13 @@ class LauncherTray(QMainWindow):
             args: ((Path, int), QMenu), the path to the script,
                 the timestamp of the ChildScript, and the QMenu associated with this script.
         """
-        #if(args[0][1].stem in self.currently_running_scripts):
-        if(args[0][1] in self.currently_running_scripts):
+        if(args[0][0].stem in self.currently_running_scripts):
+        # if(args[0][1] in self.currently_running_scripts):
             self.run_in_manager(args[0][1], self.script_manager.terminate)
             self.context_menu.removeAction(args[1].menuAction())
 
-            #del self.currently_running_scripts[args[0][1].stem]
-            del self.currently_running_scripts[args[0][1]]
+            del self.currently_running_scripts[args[0][0].stem]
+            # del self.currently_running_scripts[args[0][1]]
 
             self.script_count -= 1
 
@@ -327,6 +328,7 @@ class LauncherTray(QMainWindow):
 
         Args:
             args: (str, int), the path to the script, the timestamp of the ChildScript.
+                in case of func=terminate_script, args: int
             func: an instance function of ChildScriptManager.
         """
         dummy_action = QAction(self)
@@ -349,8 +351,9 @@ class LauncherTray(QMainWindow):
                 action.triggered.connect(partial(self.start_new_script, file_path))
                 self.available_scripts[file_path.stem] = action
 
-                for menu in self.currently_running_scripts.values():
-                    #menu = entry[1]
+                #for menu in self.currently_running_scripts.values():
+                for entry in self.currently_running_scripts.values():
+                    menu = entry[1]
                     if file_path.stem == menu.menuAction().text():
                         self.available_scripts[file_path.stem].setIcon(QIcon(self.check_mark))
                         self.available_scripts[file_path.stem].setEnabled(False)
@@ -380,11 +383,11 @@ class LauncherTray(QMainWindow):
 
                 to_del.append(timestamp)
                 self.context_menu.removeAction(
-                    #self.currently_running_scripts[child_script.script_path.stem][1].menuAction()
-                    self.currently_running_scripts[timestamp].menuAction()
+                    self.currently_running_scripts[child_script.script_path.stem][1].menuAction()
+                    # self.currently_running_scripts[timestamp].menuAction()
                 )
-                # del self.currently_running_scripts[child_script.script_path.stem]
-                del self.currently_running_scripts[timestamp]
+                del self.currently_running_scripts[child_script.script_path.stem]
+                # del self.currently_running_scripts[timestamp]
 
                 self.script_count -= 1
                 if self.script_count == 0:
@@ -430,10 +433,13 @@ class LauncherTray(QMainWindow):
             self.run_new_file(file_path)
 
     def run_new_file(self, file_path):
-        '''
+        '''Attempts to run the given argument as a .bat script
 
-        Args: Path
+        Args: 
+            file_path: Path
         '''
+        print(file_path)
+        
         if(not (file_path.is_file() and file_path.suffix == ".bat")):
             logging.info("Only .bat file is accepted.")
             print("Only .bat file is accepted.")
@@ -526,21 +532,21 @@ class LauncherTray(QMainWindow):
             QMessageBox.Yes,
         )
         if replace_reply == QMessageBox.Yes:
-            for timestamp in self.currently_running_scripts.keys():
-                self.script_manager.terminate(timestamp)
+            # for timestamp in self.currently_running_scripts.keys():
+            #     self.script_manager.terminate(timestamp)
 
-            # for tuple in self.currently_running_scripts.values():
-            #     self.script_manager.terminate(tuple[0])
+            for tuple in self.currently_running_scripts.values():
+                self.script_manager.terminate(tuple[0])
             logging.info("Tray Launcher Exited.")
             self.script_manager.deleteLater()
             qApp.quit()
     
     def quick_quit(self):
-        for timestamp in self.currently_running_scripts.keys():
-            self.script_manager.terminate(timestamp)
+        # for timestamp in self.currently_running_scripts.keys():
+        #     self.script_manager.terminate(timestamp)
         
-        # for tuple in self.currently_running_scripts.values():
-            #self.script_manager.terminate(tuple[0])
+        for tuple in self.currently_running_scripts.values():
+            self.script_manager.terminate(tuple[0])
         logging.info("Tray Launcher Exited.")
         self.script_manager.deleteLater()
         qApp.quit()
