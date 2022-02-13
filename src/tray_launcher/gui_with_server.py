@@ -37,10 +37,24 @@ class LauncherTray(QMainWindow):
     trayicon = None
     script_manager = None
     script_count = 0
-    currently_running_scripts = {}  # key: int, value: QMenu
-    available_scripts = {}  # key: str, value: QAction
+
+    #TO-DO: For the key, we better use a list: [script.stem, timestamp] so it is possible to refer to it in CLI
+
+    # key: int, value: QMenu
+        # key: timestamp
+        # value: three_menu QMenu, which contains four actions haha
+    # Contains all currently_running_scripts
+    currently_running_scripts = {}
+
+
+    # key: str, value: QAction
+        # key: script.name
+        # value: QAction
+    # This is to show up in "Start a Script"
+    available_scripts = {}
 
     def __init__(self):
+        print("Test3")
         self.HOME_PATH = Path(core.__file__).parent
         self.USER = Path.home()
 
@@ -337,6 +351,7 @@ class LauncherTray(QMainWindow):
                 if file_path.is_file:
                     file_path.unlink()
 
+    # When loaded scripts abount, this function may cost a more significant amount of time
     def check_available_scripts(self):
         """Reloads .bat files in the \\scripts directory to the view_all menu"""
         self.view_all.clear()
@@ -412,11 +427,13 @@ class LauncherTray(QMainWindow):
                 self.start_new_script(file_path)
         elif (file_path.is_file() and file_path.suffix == ".bat"):
             if(self.load_script(file_path)):
-                file_path = self.to_loaded_path(file_path.stem)
+                file_path = self.to_loaded_path(file_path.stem)     #repetition, extra step. See the function calling run_new_file
 
-                action = QAction(file_path.stem)
+                #
+                action = QAction(file_path.stem, self)    #Why don't you have ,self) ?
                 action.triggered.connect(partial(self.start_new_script, file_path))
                 self.available_scripts[file_path.name] = action
+                #
 
                 self.start_new_script(file_path)
         else:
@@ -441,9 +458,13 @@ class LauncherTray(QMainWindow):
 
         if not isDuplicateName:
             _su.copy(script_path, self.AVAILABLE_SCRIPTS)
+
+            # It is strange that I didn't add to __available_scripts__ dict here
             action = QAction(script_path.stem, self)
             action.triggered.connect(partial(self.start_new_script, script_path))
-            self.view_all.insertAction(self.view_in_directory, action)
+            self.view_all.insertAction(self.view_in_directory, action)  #But, is this "action" in __available_scripts__ dict?
+            #
+
             logging.info("{} was loaded to \\scripts.".format(str(script_path)))
             return True
         else:

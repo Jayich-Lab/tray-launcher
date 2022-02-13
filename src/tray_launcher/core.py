@@ -19,6 +19,9 @@ from win32process import GetWindowThreadProcessId
 
 class ChildScriptManager(QObject):
     # key: int, value: ChildScript
+
+        # key: timestamp
+        # value: ChildScript
     currently_running_ChildScripts = {}
 
     def __init__(self):
@@ -155,6 +158,8 @@ class ChildScript:
     def terminate_script(self):
         self.update_current_PIDs()
         try:
+
+            # TO-DO: Might be good to put this in loggings? Shouldn't be too hard because we where the logging is is fixed
             for pid in self.current_PIDs:
                 subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)])
         except Exception:
