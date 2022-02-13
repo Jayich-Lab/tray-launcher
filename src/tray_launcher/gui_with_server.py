@@ -58,7 +58,7 @@ class LauncherTray(QMainWindow):
     available_scripts = {}
 
     def __init__(self):
-        print("Test19")
+        # print("Test20")
         self.HOME_PATH = Path(core.__file__).parent
         self.USER = Path.home()
 
@@ -181,6 +181,27 @@ class LauncherTray(QMainWindow):
                         # TO-DO: How to properly format this output? i.e., how many \t to use?
                         self.message_to_client.append("{} \t \t \t \t \t \t(currently-running)".format(st))
                     else:
+                        self.message_to_client.append("{}".format(st))
+                else:
+                    if file_path.is_file:
+                        file_path.unlink()
+        elif(data[0] == "list_current"):
+            self.available_scripts.clear()
+            self.view_all.clear()
+
+            for file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
+                if file_path.is_file() and file_path.suffix == ".bat":
+                    st = file_path.stem
+
+                    action = self.view_all.addAction(st)
+                    action.triggered.connect(partial(self.start_new_script, file_path))
+                    self.available_scripts[st] = action
+
+                    if st in self.currently_running_scripts:
+                        self.available_scripts[st].setIcon(QIcon(self.check_mark))
+                        self.available_scripts[st].setEnabled(False)
+                        
+                        # TO-DO: How to properly format this output? i.e., how many \t to use?
                         self.message_to_client.append("{}".format(st))
                 else:
                     if file_path.is_file:

@@ -51,7 +51,9 @@ def main():
 
     parser.add_argument("-t", "--terminate", nargs="*", metavar="script_stem", type=str, help="Terminate the script specified.")
 
-    parser.add_argument("-l", "--list", action="store_true", help="List all loaded scripts.")   #Should supply an option to only view "currently running"
+    parser.add_argument("-L", "--list", action="store_true", help="List all loaded scripts.")   #Should supply an option to only view "currently running"
+
+    parser.add_argument("-l", "--list-current", action="store_true", help="List all currently running scripts.")   #Should supply an option to only view "currently running"
 
     parser.add_argument("--load", nargs="*", metavar="script_path", type=str, help="Load some scripts.")
 
@@ -66,39 +68,41 @@ def main():
 
     args = parser.parse_args()
 
+    if args.load != None:
+        print("Loading {}.".format(args.load))
+        TrayLauncherClient("load", args.load)
+
     if args.start != None:
         print("Starting {}.".format(args.start))
         TrayLauncherClient("start", args.start)
 
-    elif args.terminate != None:
-        print("Terminating {}.".format(args.terminate))
-        TrayLauncherClient("terminate", args.terminate)
-
-    elif args.list == True:
-        print("Scripts below: ")
-        TrayLauncherClient("list", [])
-
-    elif args.load != None:
-        print("Loading {}.".format(args.load))
-        TrayLauncherClient("load", args.load)
-
-    elif args.restart != None:
-        print("Restarting {}.".format(args.restart))
-        TrayLauncherClient("restart", args.restart)
-
-    elif args.log != None:
+    if args.log != None:
         print("Showing log of {}.".format(args.log))
         TrayLauncherClient("log", args.log)
 
-    elif args.front != None:
+    if args.restart != None:
+        print("Restarting {}.".format(args.restart))
+        TrayLauncherClient("restart", args.restart)
+
+    if args.front != None:
         print("Bringing {} to the foreground.".format(args.front))
         TrayLauncherClient("front", args.front)
 
-    elif args.quit == True:
+    if args.terminate != None:
+        print("Terminating {}.".format(args.terminate))
+        TrayLauncherClient("terminate", args.terminate)
+
+    if args.list == True:
+        print("Available scripts: ")
+        TrayLauncherClient("list", [])
+    
+    if args.list_current == True:
+        print("Currently running scripts: ")
+        TrayLauncherClient("list_current", [])
+
+    if args.quit == True:
         print("Quiting tray launcher.")
         TrayLauncherClient("quit", [])
-    else:
-        return
 
     
 if __name__ == "__main__":
