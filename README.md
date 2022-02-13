@@ -1,13 +1,14 @@
 # tray-launcher
 
 [![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://docs.python.org/3.7/)
-<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
 A launcher resided in the task bar for managing .bat scripts.
 
+## New: Tray launcher is now coming with CLI! `tray-launcher`, then `launcher -h` to learn how it works. ##
+
 ## Installation
 
-*tray-launcher* can be installed by running `pip install -i https://test.pypi.org/simple/ tray-launcher==0.1.4`. It requires Python 3.7+ to run.
+*tray-launcher* can be installed by running `pip install -i https://test.pypi.org/simple/ tray-launcher`. It requires Python 3.7+ to run.
 
 ## Usage
 
