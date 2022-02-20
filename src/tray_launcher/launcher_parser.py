@@ -45,8 +45,10 @@ def get_parser():
 
     p_log = launcher.add_parser(
         "log",
-        help=('Views scripts\' logs. Use "launcher log tray-launcher"'
-            ' to view the log of the tray launcher')
+        help=(
+            'Views scripts\' logs. Use "launcher log tray-launcher"'
+            " to view the log of the tray launcher"
+        ),
     )
     p_log.add_argument(
         "log_scripts",
@@ -97,8 +99,10 @@ def main():
             tray_launcher_client.TrayLauncherClient("list", []).attempt_connect()
         else:
             print(
-                ("tray_launcher list: error: at least one of the following"
-                " arguments are required: -a/--all, -r/--running")
+                (
+                    "tray_launcher list: error: at least one of the following"
+                    " arguments are required: -a/--all, -r/--running"
+                )
             )
 
     elif args.launcher == "log":
