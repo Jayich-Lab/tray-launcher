@@ -1,5 +1,7 @@
-import argparse 
+import argparse
+
 from tray_launcher import tray_launcher_client
+
 
 def create_parser():
     parser = argparse.ArgumentParser(
@@ -19,9 +21,7 @@ def create_parser():
         help="Terminate the script specified",
     )
 
-    parser.add_argument(
-        "-L", "--list", action="store_true", help="List all loaded scripts"
-    )
+    parser.add_argument("-L", "--list", action="store_true", help="List all loaded scripts")
 
     parser.add_argument(
         "-l", "--list-current", action="store_true", help="List all currently running scripts"
@@ -46,7 +46,7 @@ def create_parser():
         metavar="script_stem",
         type=str,
         help="View log of the specified, currently running script. Show the log of the tray launcher application when the user calls launcher --log tray-launcher",
-)
+    )
 
     parser.add_argument(
         "-f",
@@ -58,7 +58,7 @@ def create_parser():
     )
 
     parser.add_argument("-q", "--quit", action="store_true", help="Quit the tray launcher")
-    
+
     return parser
 
 

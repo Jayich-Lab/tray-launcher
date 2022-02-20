@@ -8,7 +8,7 @@ from functools import partial
 from pathlib import Path
 
 from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, Qt
-from PyQt5.QtGui import QCloseEvent, QIcon
+from PyQt5.QtGui import QIcon
 from PyQt5.QtNetwork import QHostAddress, QTcpServer
 from PyQt5.QtWidgets import (
     QAction,
@@ -25,8 +25,7 @@ from PyQt5.QtWidgets import (
     qApp,
 )
 
-from tray_launcher import child_script
-from tray_launcher import child_script_manager
+from tray_launcher import child_script, child_script_manager, tray_launcher_client
 
 
 class LauncherTray(QMainWindow):
@@ -51,7 +50,7 @@ class LauncherTray(QMainWindow):
     available_scripts = {}
 
     def __init__(self):
-        # print("Test20")
+        # print("Test21")
         self.HOME_PATH = Path(child_script.__file__).parent
         self.USER = Path.home()
 
@@ -114,9 +113,9 @@ class LauncherTray(QMainWindow):
         while not clientConnection.atEnd():
             data.append(str(clientConnection.readLine(), encoding="ascii")[0:-1])
 
-        print(data)
-
-        if data[0] == "start":
+        if data[0] == "test":
+            self.message_to_client = "haha"
+        elif data[0] == "start":
             for p in data[1:]:
                 file_path = self.to_loaded_path(Path(p))
                 if not (file_path is None):
@@ -234,7 +233,6 @@ class LauncherTray(QMainWindow):
 
         elif data[0] == "log":
             for p in data[1:]:
-                # So if you run a script named tray-launcher, it would be super confused. haha
                 if p == "tray-launcher":
                     self.show_logs(self._log_directory / "tray_launcher.log")
                     self.message_to_client.append("SUCCESS: Log of this tray launcher is shown.")
@@ -258,6 +256,9 @@ class LauncherTray(QMainWindow):
                             self.message_to_client.append("{} is not valid.".format(p))
                     else:
                         self.message_to_client.append("{} is not valid.".format(p))
+
+        elif data[0] == "all_logs":
+            self.show_logs(self.LOGS)
 
         elif data[0] == "front":
             for p in data[1:]:
@@ -312,7 +313,6 @@ class LauncherTray(QMainWindow):
                 + str(port)
                 + ". See README.md to switch to an available port."
             )
-            # We want to do more explicit warnings
             return
         self.server.newConnection.connect(self.processConnection)
 
@@ -327,7 +327,6 @@ class LauncherTray(QMainWindow):
 
         self.view_all = QMenu("Start a Script", self)
         self.add_available_scripts(self.view_all)
-        # self.view_all.aboutToShow.connect(self.check_available_scripts)
 
         self.view_in_directory = self.view_all.addAction("[View in Directory]")
         self.view_in_directory.triggered.connect(
@@ -412,7 +411,6 @@ class LauncherTray(QMainWindow):
         self.context_menu.insertMenu(self.bottom_separator, three_menu)
 
         self.currently_running_scripts[script_path.stem] = (timestamp, three_menu)
-        # self.currently_running_scripts[timestamp] = three_menu
 
         three_menu.menuAction().setIcon(QIcon(self.check_mark))
         self.available_scripts[script_path.stem].setEnabled(False)
@@ -440,12 +438,10 @@ class LauncherTray(QMainWindow):
                 the timestamp of the ChildScript, and the QMenu associated with this script.
         """
         if args[0][0].stem in self.currently_running_scripts:
-            # if(args[0][1] in self.currently_running_scripts):
             self.run_in_manager(args[0][1], self.script_manager.terminate)
             self.context_menu.removeAction(args[1].menuAction())
 
             del self.currently_running_scripts[args[0][0].stem]
-            # del self.currently_running_scripts[args[0][1]]
 
             self.script_count -= 1
 
@@ -468,7 +464,7 @@ class LauncherTray(QMainWindow):
             logging.info("{} was terminated through Tray Launcher.".format(args[0][0].stem))
 
         else:
-            print("{} is not running.".format(args[0][0].stem))
+            self.message_to_client.append("{} is not running.".format(args[0][0].stem))
 
     def restart_script(self, args):
         """Restarts a script.
@@ -494,7 +490,6 @@ class LauncherTray(QMainWindow):
         dummy_action.triggered.connect(partial(func, args))
         dummy_action.trigger()
 
-    # This is an important reset method. Coordinate with this
     def add_available_scripts(self, target_menu):
         """Loads all .bat files in the \\scripts directory to the menu specified.
 
@@ -537,24 +532,27 @@ class LauncherTray(QMainWindow):
         Also rebuilds the the view_all menu
         """
         to_del = []
-        for timestamp, child_script in self.script_manager.currently_running_ChildScripts.items():
-            if not child_script.is_active():
-                child_script.outputs_file.close()
+        for (
+            timestamp,
+            child_script_obj,
+        ) in self.script_manager.currently_running_ChildScripts.items():
+            if not child_script_obj.is_active():
+                child_script_obj.outputs_file.close()
 
                 to_del.append(timestamp)
                 self.context_menu.removeAction(
-                    self.currently_running_scripts[child_script.script_path.stem][1].menuAction()
-                    # self.currently_running_scripts[timestamp].menuAction()
+                    self.currently_running_scripts[child_script_obj.script_path.stem][
+                        1
+                    ].menuAction()
                 )
-                del self.currently_running_scripts[child_script.script_path.stem]
-                # del self.currently_running_scripts[timestamp]
+                del self.currently_running_scripts[child_script_obj.script_path.stem]
 
                 self.script_count -= 1
                 if self.script_count == 0:
                     self.none_currently_running.setVisible(True)
                 logging.info(
                     "{} has already been terminated. Now removed from the menu.".format(
-                        child_script.script_path_str
+                        child_script_obj.script_path_str
                     )
                 )
 
@@ -720,13 +718,6 @@ class LauncherTray(QMainWindow):
         logging.info("Logs {} were opened.".format(log_path))
         os.startfile(log_path)
 
-    # This is needed in case the tray launcher is quit abnormally
-    # Some repetition may occur, but that's no matter
-    def closeEvent(self, a0: QCloseEvent) -> None:
-        print("Tray Launcher out.")
-        self.quick_quit()
-        return super().closeEvent(a0)
-
     def show_help(self):
         """Displays a Help window in the middle of the screen"""
         self.help_window = QWidget()
@@ -761,6 +752,11 @@ def main():
 
 
 def run_pythonw():
+    instance_already_exists = tray_launcher_client.TrayLauncherClient(None, None).check_connection()
+    if(instance_already_exists is True):
+        print("There is already an instance of tray launcher running.")
+        return
+
     HOME_PATH = Path(__file__).parent / "gui.py"
 
     t = _t.localtime(_t.time())

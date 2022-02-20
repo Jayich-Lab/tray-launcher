@@ -9,7 +9,9 @@ from win32con import (
 )
 from win32gui import EnumWindows, IsWindowEnabled, IsWindowVisible, SetWindowPos, ShowWindow
 from win32process import GetWindowThreadProcessId
+
 from tray_launcher import child_script
+
 
 class ChildScriptManager(QObject):
     # key: int, value: ChildScript
