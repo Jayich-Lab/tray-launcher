@@ -22,7 +22,9 @@ class TrayLauncherClient(QObject):
         self.data = data
 
     def check_connection(self):
-        """Attempts to connect to the tray launcher TCP server to check if there is already one tray launcher instance running"""
+        """Attempts to connect to the tray launcher TCP server 
+            to check if there is already one tray launcher instance running
+        """
         self.command = "test"
         self.data = "empty"
         self.client.connectToHost(
@@ -47,7 +49,8 @@ class TrayLauncherClient(QObject):
 
         if not success_connect:
             print(
-                "Failed to connect to the launcher server. Run tray launcher first, and check if the port supposedly used by the tray launcher is occupied."
+                ("Failed to connect to the launcher server. Run tray launcher first,"
+                " and check if the port supposedly used by the tray launcher is occupied.")
             )
             return
 
