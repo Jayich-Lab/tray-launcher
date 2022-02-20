@@ -138,25 +138,53 @@ class LauncherTray(QMainWindow):
         super().resize(0, 0)
         self.trayicon.show()
 
-    def write_to_client(self, connection):
-        '''Passes the string (self.message_to_client) created by the server to the client.
+    def processConnection(self):
+        '''Processes the list passed from the client, and writes response back.
         '''
+        clientConnection = self.server.nextPendingConnection()
 
-        if not self.message_to_client:
-            return
+        clientConnection.waitForReadyRead()
 
-        message = "\n".join(self.message_to_client)
-        self.message_to_client = []
+        data = []
+        while not clientConnection.atEnd():
+            data.append(str(clientConnection.readLine(), encoding="ascii")[0:-1])
 
-        block = QByteArray()
-        out = QDataStream(block, QIODevice.ReadWrite)
-        out.setVersion(QDataStream.Qt_5_0)
-        out.writeUInt16(0)
-        message = bytes(message, encoding="ascii")
-        out.writeString(message)
-        out.device().seek(0)
-        out.writeUInt16(block.size() - 2)
-        connection.write(block)
+        if data[0] == "test":
+            self.message_to_client = " "
+
+        elif data[0] == "start":
+            self.process_start(data)
+
+        elif data[0] == "terminate":
+            self.process_terminate(data)
+
+        elif data[0] == "list":
+            self.process_list()
+
+        elif data[0] == "list_current":
+            self.process_list_current()
+
+        elif data[0] == "load":
+            self.process_load(data)
+
+        elif data[0] == "restart":
+            self.process_restart(data)
+
+        elif data[0] == "log":
+            self.process_log(data)
+
+        elif data[0] == "all_logs":
+            self.show_logs(self.LOGS)
+
+        elif data[0] == "focus":
+            self.process_focus(data)
+
+        elif data[0] == "quit":
+            self.quick_quit()
+
+        self.write_to_client(clientConnection)
+        clientConnection.disconnected.connect(clientConnection.deleteLater)
+        clientConnection.disconnectFromHost()
 
     def process_start(self, data):
         '''Process the "start" command. Start new scripts.
@@ -337,53 +365,25 @@ class LauncherTray(QMainWindow):
             else:
                 self.message_to_client.append("{} is not valid.".format(path_str))
 
-    def processConnection(self):
-        '''Processes the list passed from the client, and writes response back.
+    def write_to_client(self, connection):
+        '''Passes the string (self.message_to_client) created by the server to the client.
         '''
-        clientConnection = self.server.nextPendingConnection()
 
-        clientConnection.waitForReadyRead()
+        if not self.message_to_client:
+            return
 
-        data = []
-        while not clientConnection.atEnd():
-            data.append(str(clientConnection.readLine(), encoding="ascii")[0:-1])
+        message = "\n".join(self.message_to_client)
+        self.message_to_client = []
 
-        if data[0] == "test":
-            self.message_to_client = " "
-
-        elif data[0] == "start":
-            self.process_start(data)
-
-        elif data[0] == "terminate":
-            self.process_terminate(data)
-
-        elif data[0] == "list":
-            self.process_list()
-
-        elif data[0] == "list_current":
-            self.process_list_current()
-
-        elif data[0] == "load":
-            self.process_load(data)
-
-        elif data[0] == "restart":
-            self.process_restart(data)
-
-        elif data[0] == "log":
-            self.process_log(data)
-
-        elif data[0] == "all_logs":
-            self.show_logs(self.LOGS)
-
-        elif data[0] == "focus":
-            self.process_focus(data)
-
-        elif data[0] == "quit":
-            self.quick_quit()
-
-        self.write_to_client(clientConnection)
-        clientConnection.disconnected.connect(clientConnection.deleteLater)
-        clientConnection.disconnectFromHost()
+        block = QByteArray()
+        out = QDataStream(block, QIODevice.ReadWrite)
+        out.setVersion(QDataStream.Qt_5_0)
+        out.writeUInt16(0)
+        message = bytes(message, encoding="ascii")
+        out.writeString(message)
+        out.device().seek(0)
+        out.writeUInt16(block.size() - 2)
+        connection.write(block)
 
     def to_loaded_path(self, path_given):
         """Returns a Path that resembles one pointing to the "scripts" directory
@@ -708,6 +708,8 @@ class LauncherTray(QMainWindow):
             qApp.quit()
 
     def quick_quit(self):
+        '''Quits the tray launcher without prompting a question messagebox.
+        '''
         for tuple in self.currently_running_scripts.values():
             self.script_manager.terminate(tuple[0])
         logging.info("Tray Launcher Exited.")
