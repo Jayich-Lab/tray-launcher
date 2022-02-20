@@ -97,7 +97,7 @@ class ChildScript:
                 str(self.childScript_PID)
             ),
             encoding=self.ENCODING,
-            # stdout=subprocess.PIPE,
+            stdout=subprocess.PIPE,
             shell=True,
         )
         for line in wmic_.stdout.split("\n"):
