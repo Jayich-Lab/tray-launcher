@@ -159,7 +159,7 @@ class LauncherTray(QMainWindow):
             "log": self.process_log,
             "all_logs": self.process_all_logs,
             "focus": self.process_focus,
-            "quit": self.process_quit
+            "quit": self.process_quit,
         }
 
         try:

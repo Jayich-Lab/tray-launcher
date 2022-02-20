@@ -71,22 +71,6 @@ def get_parser():
     return parser
 
 
-def list_worker(args):
-    if args.running is True:
-        print("Currently running scripts: ")
-        tray_launcher_client.TrayLauncherClient("list_current", []).attempt_connect()
-    elif args.all is True:
-        print("All available scripts: ")
-        tray_launcher_client.TrayLauncherClient("list", []).attempt_connect()
-    else:
-        print(
-            (
-                "tray_launcher list: error: at least one of the following"
-                " arguments are required: -a/--all, -r/--running"
-            )
-        )
-
-
 def main():
     args = get_parser().parse_args()
 
@@ -107,7 +91,19 @@ def main():
         ).attempt_connect()
 
     elif args.launcher == "list":
-        list_worker(args)
+        if args.running is True:
+            print("Currently running scripts: ")
+            tray_launcher_client.TrayLauncherClient("list_current", []).attempt_connect()
+        elif args.all is True:
+            print("All available scripts: ")
+            tray_launcher_client.TrayLauncherClient("list", []).attempt_connect()
+        else:
+            print(
+                (
+                    "tray_launcher list: error: at least one of the following"
+                    " arguments are required: -a/--all, -r/--running"
+                )
+            )
 
     elif args.launcher == "log":
         if args.all is True:
