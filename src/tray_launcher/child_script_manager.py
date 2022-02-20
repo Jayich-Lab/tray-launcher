@@ -14,8 +14,6 @@ from tray_launcher import child_script
 
 
 class ChildScriptManager(QObject):
-    # key: int, value: ChildScript
-
     # key: timestamp
     # value: ChildScript
     currently_running_ChildScripts = {}

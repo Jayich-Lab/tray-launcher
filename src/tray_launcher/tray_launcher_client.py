@@ -6,6 +6,12 @@ from PyQt5.QtNetwork import QTcpSocket
 
 class TrayLauncherClient(QObject):
     def __init__(self, command, data):
+        '''Initiate the client.
+
+        Args:
+            command: str
+            data: str
+        '''
         super().__init__()
 
         self.blockSize = 0
@@ -16,6 +22,8 @@ class TrayLauncherClient(QObject):
         self.data = data
     
     def check_connection(self):
+        '''Attempts to connect to the tray launcher TCP server to check if there is already one tray launcher instance running
+        '''
         self.command = "test"
         self.data = "empty"
         self.client.connectToHost(
@@ -32,6 +40,8 @@ class TrayLauncherClient(QObject):
             return True
 
     def attempt_connect(self):
+        '''Connects to the tray launcher server.
+        '''
         self.client.connectToHost(
             "127.0.0.1", int(os.environ.get("TRAY_LAUNCHER_PORT", 7686)), QIODevice.ReadWrite
         )

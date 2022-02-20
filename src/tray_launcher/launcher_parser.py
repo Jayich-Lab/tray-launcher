@@ -107,7 +107,7 @@ def main():
 
     elif args.launcher == "focus":
         print("Bringing {} to the foreground.".format(args.focusing_scripts))
-        tray_launcher_client.TrayLauncherClient("front", args.focusing_scripts).attempt_connect()
+        tray_launcher_client.TrayLauncherClient("focus", args.focusing_scripts).attempt_connect()
 
     elif args.launcher == "run":
         print("Running tray launcher.")
