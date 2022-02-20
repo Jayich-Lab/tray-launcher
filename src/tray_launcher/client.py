@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from PyQt5.QtCore import QDataStream, QIODevice, QObject
 from PyQt5.QtNetwork import QTcpSocket
@@ -11,7 +12,7 @@ class TrayLauncherClient(QObject):
         self.blockSize = 0
 
         self.client = QTcpSocket(self)
-        self.client.connectToHost("127.0.0.1", 7686, QIODevice.ReadWrite)
+        self.client.connectToHost("127.0.0.1", int(os.environ.get("TRAY_LAUNCHER_PORT", 7686)), QIODevice.ReadWrite)
         self.client.waitForConnected()
 
         self.client.write(bytes(command + "\n", encoding="ascii"))
