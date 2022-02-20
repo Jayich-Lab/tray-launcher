@@ -77,11 +77,15 @@ def main():
 
     elif args.launcher == "terminate":
         print("Terminating {}.".format(args.terminating_scripts))
-        tray_launcher_client.TrayLauncherClient("terminate", args.terminating_scripts).attempt_connect()
+        tray_launcher_client.TrayLauncherClient(
+            "terminate", args.terminating_scripts
+        ).attempt_connect()
 
     elif args.launcher == "restart":
         print("Restarting {}.".format(args.restarting_scripts))
-        tray_launcher_client.TrayLauncherClient("restart", args.restarting_scripts).attempt_connect()
+        tray_launcher_client.TrayLauncherClient(
+            "restart", args.restarting_scripts
+        ).attempt_connect()
 
     elif args.launcher == "list":
         if args.running is True:
@@ -91,10 +95,12 @@ def main():
             print("All available scripts: ")
             tray_launcher_client.TrayLauncherClient("list", []).attempt_connect()
         else:
-            print("tray_launcher list: error: at least one of the following arguments are required: -a/--all, -r/--running")
+            print(
+                "tray_launcher list: error: at least one of the following arguments are required: -a/--all, -r/--running"
+            )
 
     elif args.launcher == "log":
-        if(args.all is True):
+        if args.all is True:
             print("Showing all logs.")
             tray_launcher_client.TrayLauncherClient("all_logs", []).attempt_connect()
         else:

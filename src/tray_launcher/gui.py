@@ -244,7 +244,7 @@ class LauncherTray(QMainWindow):
                         self.message_to_client.append("{} is not valid.".format(p))
                 else:
                     self.message_to_client.append("{} is not valid.".format(p))
-    
+
     def process_focus(self, data):
         for p in data[1:]:
             file_path = self.to_loaded_path(Path(p))
@@ -254,9 +254,7 @@ class LauncherTray(QMainWindow):
                     and file_path.parent == self.AVAILABLE_SCRIPTS
                     and file_path.stem in self.currently_running_scripts
                 ):
-                    self.show_script(
-                        (file_path, self.currently_running_scripts[file_path.stem][0])
-                    )
+                    self.show_script((file_path, self.currently_running_scripts[file_path.stem][0]))
                     self.message_to_client.append(
                         "SUCCESS: {} is now brought to the front.".format(p)
                     )
@@ -746,7 +744,7 @@ def main():
 
 def run_pythonw():
     instance_already_exists = tray_launcher_client.TrayLauncherClient(None, None).check_connection()
-    if(instance_already_exists is True):
+    if instance_already_exists is True:
         print("There is already an instance of tray launcher running.")
         return
 
