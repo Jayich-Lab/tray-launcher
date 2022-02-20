@@ -1,6 +1,7 @@
 # tray-launcher
 
 [![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://docs.python.org/3.7/)
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
 A launcher resided in the task bar for managing .bat scripts.
 
@@ -24,6 +25,6 @@ The *tray launcher* will list all scripts you started and are currently running.
 
 ## Warnings
 
-1. The tray launcher is listening to `host: 127.0.0.1`, `port: 7686`. If this port is not available, the command line interface will not work. You need to go to control panel, create a new *system* environment variable named `TRAY_LAUNCHER_PORT` and set its value to a port number that is available on your device.
+1. The *tray launcher* is listening to `host: 127.0.0.1`, `port: 7686`. If this port is not available, the command line interface will not work. You need to go to control panel, create a new **system** environment variable named `TRAY_LAUNCHER_PORT` and set its value to a port number that is available on your device.
 
-2. If the tray launcher crashes, scripts run via the tray launcher will NOT be terminated.
+2. If the *tray launcher* crashes, scripts started via the *tray launcher* will NOT be terminated.
