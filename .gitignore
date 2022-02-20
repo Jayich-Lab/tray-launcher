@@ -10,3 +10,4 @@ __pycache__/
 # dev tooling
 /.venv/
 /.nox/
+/.vscode/

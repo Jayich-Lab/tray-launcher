@@ -25,7 +25,8 @@ from PyQt5.QtWidgets import (
     qApp,
 )
 
-from tray_launcher import core
+from tray_launcher import child_script
+from tray_launcher import child_script_manager
 
 
 class LauncherTray(QMainWindow):
@@ -51,7 +52,7 @@ class LauncherTray(QMainWindow):
 
     def __init__(self):
         # print("Test20")
-        self.HOME_PATH = Path(core.__file__).parent
+        self.HOME_PATH = Path(child_script.__file__).parent
         self.USER = Path.home()
 
         self.USER_HOME = self.USER / ".tray_launcher"
@@ -62,7 +63,7 @@ class LauncherTray(QMainWindow):
         self.check_mark = str(self.HOME_PATH / "icons" / "check_mark.png")
 
         super().__init__()
-        self.script_manager = core.ChildScriptManager()
+        self.script_manager = child_script_manager.ChildScriptManager()
         t = _t.localtime(_t.time())
         try:
             self._log_directory = self.LOGS / (
@@ -87,7 +88,6 @@ class LauncherTray(QMainWindow):
         self.initUI()
         self.initServer()
 
-    # Copied from
     def write_to_client(self, connection):
         if not self.message_to_client:
             return
@@ -95,19 +95,14 @@ class LauncherTray(QMainWindow):
         message = "\n".join(self.message_to_client)
         self.message_to_client = []
 
-        # instantiate a QByteArray
         block = QByteArray()
-        # QDataStream class provides serialization of binary data to a QIODevice
         out = QDataStream(block, QIODevice.ReadWrite)
-        # We are using PyQt5 so set the QDataStream version accordingly.
         out.setVersion(QDataStream.Qt_5_0)
         out.writeUInt16(0)
         message = bytes(message, encoding="ascii")
-        # now use the QDataStream and write the byte array to it.
         out.writeString(message)
         out.device().seek(0)
         out.writeUInt16(block.size() - 2)
-        # now send the QByteArray.
         connection.write(block)
 
     def processConnection(self):
