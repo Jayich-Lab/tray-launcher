@@ -142,7 +142,7 @@ class ChildScript:
             raise
 
         self.childScript = subprocess.Popen(
-            "\"" + self.script_path_str + "\"",
+            '"' + self.script_path_str + '"',
             encoding=self.ENCODING,
             stdout=self.outputs_file,
             stderr=self.outputs_file,
