@@ -113,7 +113,7 @@ class ChildScript:
     current_PIDs = []
 
     def __init__(self, script_path_str):
-        self.script_path_str = """ + script_path_str + """
+        self.script_path_str = '"' + script_path_str + '"'
 
         self.USER_HOME = Path.home() / ".tray_launcher"
         self.LOGS = self.USER_HOME / "logs"
