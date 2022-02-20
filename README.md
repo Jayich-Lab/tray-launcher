@@ -4,11 +4,11 @@
 
 A launcher resided in the task bar for managing .bat scripts.
 
-## New: Tray launcher is now coming with CLI! `tray-launcher`, then `launcher -h` to learn how it works. ##
+## New: Tray launcher is now coming with CLI! Enter `launcher -h` to learn how it works. ##
 
 ## Installation
 
-*tray-launcher* can be installed by running `pip install -i https://test.pypi.org/simple/ tray-launcher`. It requires Python 3.7+ to run.
+*tray-launcher* can be installed with `pip install -i https://test.pypi.org/simple/ tray-launcher`.
 
 ## Usage
 
