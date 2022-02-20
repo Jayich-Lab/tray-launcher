@@ -24,4 +24,6 @@ The *tray launcher* will list all scripts you started and are currently running.
 
 ## Warnings
 
-The tray launcher is listening to `host: 127.0.0.1`, `port: 7686`. If this port is not available, the command line interface will not work. You need to go to control panel, create a new *system* environment variable named `TRAY_LAUNCHER_PORT` and set its value to a port number that is available on your device.
+1. The tray launcher is listening to `host: 127.0.0.1`, `port: 7686`. If this port is not available, the command line interface will not work. You need to go to control panel, create a new *system* environment variable named `TRAY_LAUNCHER_PORT` and set its value to a port number that is available on your device.
+
+2. If the tray launcher crashes, scripts run via the tray launcher will NOT be terminated.
