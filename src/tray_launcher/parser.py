@@ -3,11 +3,11 @@ from tray_launcher import tray_launcher_client
 
 def create_parser():
     parser = argparse.ArgumentParser(
-        prog="tray_launcher", description="Manage scripts with the tray launcher."
+        prog="tray_launcher", description="Manage scripts with the tray launcher"
     )
 
     parser.add_argument(
-        "-s", "--start", nargs="*", metavar="script_stem", type=str, help="Start new script(s)."
+        "-s", "--start", nargs="*", metavar="script_stem", type=str, help="Start new script(s)"
     )
 
     parser.add_argument(
@@ -16,19 +16,19 @@ def create_parser():
         nargs="*",
         metavar="script_stem",
         type=str,
-        help="Terminate the script specified.",
+        help="Terminate the script specified",
     )
 
     parser.add_argument(
-        "-L", "--list", action="store_true", help="List all loaded scripts."
+        "-L", "--list", action="store_true", help="List all loaded scripts"
     )
 
     parser.add_argument(
-        "-l", "--list-current", action="store_true", help="List all currently running scripts."
+        "-l", "--list-current", action="store_true", help="List all currently running scripts"
     )
 
     parser.add_argument(
-        "--load", nargs="*", metavar="script_path", type=str, help="Load some scripts."
+        "--load", nargs="*", metavar="script_path", type=str, help="Load some scripts"
     )
 
     parser.add_argument(
@@ -37,7 +37,7 @@ def create_parser():
         nargs="*",
         metavar="script_stem",
         type=str,
-        help="Restart the script specified.",
+        help="Restart the script specified",
     )
 
     parser.add_argument(
@@ -45,7 +45,7 @@ def create_parser():
         nargs="*",
         metavar="script_stem",
         type=str,
-        help="View log of the specified, currently running script. Use \"tray-launcher\" to access the log of this tray",
+        help="View log of the specified, currently running script. Show the log of the tray launcher application when the user calls launcher --log tray-launcher",
 )
 
     parser.add_argument(
@@ -54,10 +54,10 @@ def create_parser():
         nargs="*",
         metavar="script_stem",
         type=str,
-        help="Bring the specified script to the foreground.",
+        help="Bring the specified script to the foreground",
     )
 
-    parser.add_argument("-q", "--quit", action="store_true", help="Quit the tray launcher.")
+    parser.add_argument("-q", "--quit", action="store_true", help="Quit the tray launcher")
     
     return parser
 

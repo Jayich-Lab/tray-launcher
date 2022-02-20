@@ -12,6 +12,8 @@ class TrayLauncherClient(QObject):
         self.blockSize = 0
 
         self.client = QTcpSocket(self)
+        self.client.readyRead.connect(self.read_from_server)
+        
         self.client.connectToHost("127.0.0.1", int(os.environ.get("TRAY_LAUNCHER_PORT", 7686)), QIODevice.ReadWrite)
         self.client.waitForConnected()
 
@@ -20,7 +22,6 @@ class TrayLauncherClient(QObject):
         for entry in data:
             self.client.write(bytes((entry + "\n"), encoding="ascii"))
 
-        self.client.readyRead.connect(self.read_from_server)
         self.client.waitForDisconnected()
 
     def read_from_server(self):
