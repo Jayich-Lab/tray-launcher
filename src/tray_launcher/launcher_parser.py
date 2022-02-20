@@ -1,6 +1,4 @@
 import argparse
-from ast import Return
-from functools import partial
 
 from tray_launcher import gui, tray_launcher_client
 
