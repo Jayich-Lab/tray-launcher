@@ -139,8 +139,7 @@ class LauncherTray(QMainWindow):
         self.trayicon.show()
 
     def processConnection(self):
-        '''Processes the list passed from the client, and writes response back.
-        '''
+        """Processes the list passed from the client, and writes response back."""
         clientConnection = self.server.nextPendingConnection()
 
         clientConnection.waitForReadyRead()
@@ -187,8 +186,7 @@ class LauncherTray(QMainWindow):
         clientConnection.disconnectFromHost()
 
     def process_start(self, data):
-        '''Process the "start" command. Start new scripts.
-        '''
+        """Process the "start" command. Start new scripts."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
             if not (file_path is None):
@@ -202,8 +200,7 @@ class LauncherTray(QMainWindow):
                 self.message_to_client.append("{} is not valid.".format(path_str))
 
     def process_terminate(self, data):
-        '''Process the "terminate" command. Terminate scripts that are running.
-        '''
+        """Process the "terminate" command. Terminate scripts that are running."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
             if not (file_path is None):
@@ -227,9 +224,9 @@ class LauncherTray(QMainWindow):
                 self.message_to_client.append("{} is not valid.".format(path_str))
 
     def process_list(self):
-        '''Processes the "list -a" command. Writes loaded scripts' stems to the string
-            which will be written back to the client.
-        '''
+        """Processes the "list -a" command. Writes loaded scripts' stems to the string
+        which will be written back to the client.
+        """
         self.available_scripts.clear()
         self.view_all.clear()
 
@@ -255,9 +252,9 @@ class LauncherTray(QMainWindow):
                     file_path.unlink()
 
     def process_list_current(self):
-        '''Processes the "list -r" command. Writes currently running scripts' stems to the string
-            which will be written back to the client.
-        '''
+        """Processes the "list -r" command. Writes currently running scripts' stems to the string
+        which will be written back to the client.
+        """
         self.available_scripts.clear()
         self.view_all.clear()
 
@@ -279,8 +276,7 @@ class LauncherTray(QMainWindow):
                     file_path.unlink()
 
     def process_load(self, data):
-        '''Processes the "load" command. Loads scripts to the 'scripts' directory
-        '''
+        """Processes the "load" command. Loads scripts to the 'scripts' directory"""
         for path_str in data[1:]:
             file_path = Path(path_str)
             if not (self.load_script(file_path)):
@@ -291,8 +287,7 @@ class LauncherTray(QMainWindow):
                 self.message_to_client.append("SUCCESS: {} is loaded.".format(path_str))
 
     def process_restart(self, data):
-        '''Processes the "restart" command. Restarts scripts.
-        '''
+        """Processes the "restart" command. Restarts scripts."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
             if not (file_path is None):
@@ -316,8 +311,7 @@ class LauncherTray(QMainWindow):
                 self.message_to_client.append("{} is not valid.".format(path_str))
 
     def process_log(self, data):
-        '''Processes the "log" command. Brings up the log file of the scripts.
-        '''
+        """Processes the "log" command. Brings up the log file of the scripts."""
         for path_str in data[1:]:
             if path_str == "tray-launcher":
                 self.show_logs(self._log_directory / "tray_launcher.log")
@@ -335,7 +329,9 @@ class LauncherTray(QMainWindow):
                                 self.currently_running_scripts[file_path.stem][0]
                             ].log_path
                         )
-                        self.message_to_client.append("SUCCESS: log of {} is shown.".format(path_str))
+                        self.message_to_client.append(
+                            "SUCCESS: log of {} is shown.".format(path_str)
+                        )
                     elif file_path.is_file() and file_path.parent == self.AVAILABLE_SCRIPTS:
                         self.message_to_client.append("{} is not running.".format(path_str))
                     else:
@@ -344,8 +340,7 @@ class LauncherTray(QMainWindow):
                     self.message_to_client.append("{} is not valid.".format(path_str))
 
     def process_focus(self, data):
-        '''Processes the "focus" command. Brings the scripts to the foreground.
-        '''
+        """Processes the "focus" command. Brings the scripts to the foreground."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
             if not (file_path is None):
@@ -366,8 +361,7 @@ class LauncherTray(QMainWindow):
                 self.message_to_client.append("{} is not valid.".format(path_str))
 
     def write_to_client(self, connection):
-        '''Passes the string (self.message_to_client) created by the server to the client.
-        '''
+        """Passes the string (self.message_to_client) created by the server to the client."""
 
         if not self.message_to_client:
             return
@@ -708,8 +702,7 @@ class LauncherTray(QMainWindow):
             qApp.quit()
 
     def quick_quit(self):
-        '''Quits the tray launcher without prompting a question messagebox.
-        '''
+        """Quits the tray launcher without prompting a question messagebox."""
         for tuple in self.currently_running_scripts.values():
             self.script_manager.terminate(tuple[0])
         logging.info("Tray Launcher Exited.")
