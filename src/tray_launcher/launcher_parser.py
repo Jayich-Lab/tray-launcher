@@ -71,6 +71,20 @@ def get_parser():
     return parser
 
 
+def get_print_pre_command(launcher, scripts):
+    if launcher == "start":
+        print_pre_command = "Starting {}.".format(scripts)
+    elif launcher == "terminate":
+        print_pre_command = "Terminating {}.".format(scripts)
+    elif launcher == "restart":
+        print_pre_command = "Restarting {}.".format(scripts)
+    elif launcher == "load":
+        print_pre_command = "Loading {}.".format(scripts)
+    elif launcher == "focus":
+        print_pre_command = "Bringing {} to the top.".format(scripts)
+    return print_pre_command
+
+
 def dispatch_command(args):
     if args.launcher == "run":
         gui.run_pythonw()
@@ -78,17 +92,8 @@ def dispatch_command(args):
 
     print_pre_command = ""
     if args.launcher in ["start", "terminate", "restart", "load", "focus"]:
+        print_pre_command = get_print_pre_command(args.launcher, args.scripts)
         commands = (args.launcher, args.scripts)
-        if args.launcher == "start":
-            print_pre_command = "Starting {}.".format(args.scripts)
-        elif args.launcher == "terminate":
-            print_pre_command = "Terminating {}.".format(args.scripts)
-        elif args.launcher == "restart":
-            print_pre_command = "Restarting {}.".format(args.scripts)
-        elif args.launcher == "load":
-            print_pre_command = "Loading {}.".format(args.scripts)
-        elif args.launcher == "focus":
-            print_pre_command = "Bringing {} to the top.".format(args.scripts)
     elif args.launcher == "quit":
         print_pre_command = "Quitting tray launcher."
         commands = ("quit", [])
