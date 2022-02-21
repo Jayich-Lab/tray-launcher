@@ -79,7 +79,16 @@ def dispatch_command(args):
     print_pre_command = ""
     if args.launcher in ["start", "terminate", "restart", "load", "focus"]:
         commands = (args.launcher, args.scripts)
-        print_pre_command = "Starting {}.".format(args.scripts)
+        if args.launcher == "start":
+            print_pre_command = "Starting {}.".format(args.scripts)
+        elif args.launcher == "terminate":
+            print_pre_command = "Terminating {}.".format(args.scripts)
+        elif args.launcher == "restart":
+            print_pre_command = "Restarting {}.".format(args.scripts)
+        elif args.launcher == "load":
+            print_pre_command = "Loading {}.".format(args.scripts)
+        elif args.launcher == "focus":
+            print_pre_command = "Bringing {} to the top.".format(args.scripts)
     elif args.launcher == "quit":
         print_pre_command = "Quitting tray launcher."
         commands = ("quit", [])
