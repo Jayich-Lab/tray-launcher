@@ -13,14 +13,14 @@ def get_parser():
 
     p_start = launcher.add_parser("start", help="Starts scripts")
     p_start.add_argument(
-        "starting_scripts", type=str, nargs="*", metavar="script_stem", help="Scripts to be started"
+        "scripts", type=str, nargs="*", metavar="script_stem", help="Scripts to be started"
     )
 
     launcher.add_parser("quit", help="Quits the tray launcher")
 
     p_terminate = launcher.add_parser("terminate", help="Terminates scripts")
     p_terminate.add_argument(
-        "terminating_scripts",
+        "scripts",
         nargs="*",
         metavar="script_stem",
         type=str,
@@ -31,12 +31,12 @@ def get_parser():
 
     p_load = launcher.add_parser("load", help="Loads scripts")
     p_load.add_argument(
-        "loading_scripts", nargs="*", metavar="script_path", type=str, help="Scripts to be loaded"
+        "scripts", nargs="*", metavar="script_path", type=str, help="Scripts to be loaded"
     )
 
     p_restart = launcher.add_parser("restart", help="Restarts scripts")
     p_restart.add_argument(
-        "restarting_scripts",
+        "scripts",
         nargs="*",
         metavar="script_stem",
         type=str,
@@ -51,7 +51,7 @@ def get_parser():
         ),
     )
     p_log.add_argument(
-        "log_scripts",
+        "scripts",
         nargs="*",
         metavar="script_stem",
         type=str,
@@ -61,7 +61,7 @@ def get_parser():
 
     p_focus = launcher.add_parser("focus", help="Focus scripts")
     p_focus.add_argument(
-        "focusing_scripts", nargs="*", metavar="script_stem", type=str, help="Scripts to be focused"
+        "scripts", nargs="*", metavar="script_stem", type=str, help="Scripts to be focused"
     )
 
     p_list = launcher.add_parser("list", help="Lists scripts")
@@ -71,32 +71,46 @@ def get_parser():
     return parser
 
 
-def main():
-    args = get_parser().parse_args()
+def get_print_pre_command(launcher, scripts):
+    if launcher == "start":
+        print_pre_command = "Starting {}.".format(scripts)
+    elif launcher == "terminate":
+        print_pre_command = "Terminating {}.".format(scripts)
+    elif launcher == "restart":
+        print_pre_command = "Restarting {}.".format(scripts)
+    elif launcher == "load":
+        print_pre_command = "Loading {}.".format(scripts)
+    elif launcher == "focus":
+        print_pre_command = "Bringing {} to the top.".format(scripts)
+    return print_pre_command
 
-    if args.launcher == "start":
-        print("Starting {}.".format(args.starting_scripts))
-        tray_launcher_client.TrayLauncherClient("start", args.starting_scripts).attempt_connect()
 
-    elif args.launcher == "terminate":
-        print("Terminating {}.".format(args.terminating_scripts))
-        tray_launcher_client.TrayLauncherClient(
-            "terminate", args.terminating_scripts
-        ).attempt_connect()
+def dispatch_command(args):
+    if args.launcher == "run":
+        gui.run_pythonw()
+        return
 
-    elif args.launcher == "restart":
-        print("Restarting {}.".format(args.restarting_scripts))
-        tray_launcher_client.TrayLauncherClient(
-            "restart", args.restarting_scripts
-        ).attempt_connect()
-
+    print_pre_command = ""
+    if args.launcher in ["start", "terminate", "restart", "load", "focus"]:
+        print_pre_command = get_print_pre_command(args.launcher, args.scripts)
+        commands = (args.launcher, args.scripts)
+    elif args.launcher == "quit":
+        print_pre_command = "Quitting tray launcher."
+        commands = ("quit", [])
+    elif args.launcher == "log":
+        if args.all:
+            print_pre_command = "Showing all logs."
+            commands = ("all_logs", [])
+        else:
+            print_pre_command = "Showing logs for {}.".format(args.scripts)
+            commands = ("log", args.scripts)
     elif args.launcher == "list":
-        if args.running is True:
-            print("Currently running scripts: ")
-            tray_launcher_client.TrayLauncherClient("list_current", []).attempt_connect()
-        elif args.all is True:
-            print("All available scripts: ")
-            tray_launcher_client.TrayLauncherClient("list", []).attempt_connect()
+        if args.running:
+            print_pre_command = "Running scripts: "
+            commands = ("list_current", [])
+        elif args.all:
+            print_pre_command = "All available scripts: "
+            commands = ("list", [])
         else:
             print(
                 (
@@ -104,30 +118,18 @@ def main():
                     " arguments are required: -a/--all, -r/--running"
                 )
             )
+            return
+    else:
+        print("tray_launcher: error: {} is an unrecognized command".format(args.launcher))
+        return
 
-    elif args.launcher == "log":
-        if args.all is True:
-            print("Showing all logs.")
-            tray_launcher_client.TrayLauncherClient("all_logs", []).attempt_connect()
-        else:
-            print("Showing log of {}.".format(args.log_scripts))
-            tray_launcher_client.TrayLauncherClient("log", args.log_scripts).attempt_connect()
+    print(print_pre_command)
+    tray_launcher_client.TrayLauncherClient(*commands).attempt_connect()
 
-    elif args.launcher == "load":
-        print("Loading {}.".format(args.loading_scripts))
-        tray_launcher_client.TrayLauncherClient("load", args.loading_scripts).attempt_connect()
 
-    elif args.launcher == "focus":
-        print("Bringing {} to the foreground.".format(args.focusing_scripts))
-        tray_launcher_client.TrayLauncherClient("focus", args.focusing_scripts).attempt_connect()
-
-    elif args.launcher == "run":
-        print("Running tray launcher.")
-        gui.run_pythonw()
-
-    elif args.launcher == "quit":
-        print("Quitting tray launcher.")
-        tray_launcher_client.TrayLauncherClient("quit", []).attempt_connect()
+def main():
+    args = get_parser().parse_args()
+    dispatch_command(args)
 
 
 if __name__ == "__main__":
