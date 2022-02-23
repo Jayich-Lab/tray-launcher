@@ -14,8 +14,6 @@ from tray_launcher import child_script
 
 
 class ChildScriptManager(QObject):
-    
-
     def __init__(self):
         super().__init__()
 

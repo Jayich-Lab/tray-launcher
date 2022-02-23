@@ -7,7 +7,7 @@ from pathlib import Path
 
 class ChildScript:
     ENCODING = "utf-8"
-        
+
     def __init__(self, script_path_str):
         self.script_path_str = script_path_str
         self.child_script = None

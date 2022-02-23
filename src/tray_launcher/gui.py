@@ -29,7 +29,6 @@ from tray_launcher import child_script, child_script_manager, tray_launcher_clie
 
 
 class LauncherTray(QMainWindow):
-
     def __init__(self):
         home_path = Path(child_script.__file__).parent
         user_path = Path.home()
@@ -101,7 +100,9 @@ class LauncherTray(QMainWindow):
 
         self.context_menu = QMenu(self)
         load_new_script = QAction("Load New Script(s)", self)
-        load_new_script.triggered.connect(partial(self.load_scripts_from_file_dialogue, Path.home()))
+        load_new_script.triggered.connect(
+            partial(self.load_scripts_from_file_dialogue, Path.home())
+        )
 
         self.view_all = QMenu("Start a Script", self)
         self.add_available_scripts(self.view_all)
@@ -181,7 +182,7 @@ class LauncherTray(QMainWindow):
         """Process the "start" command. Start new scripts."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
-            if (file_path is not None):
+            if file_path is not None:
                 if self.run_new_file(file_path):
                     self.message_to_client.append("SUCCESS: {} is now running.".format(path_str))
                 else:
@@ -195,7 +196,7 @@ class LauncherTray(QMainWindow):
         """Process the "terminate" command. Terminate scripts that are running."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
-            if (file_path is not None):
+            if file_path is not None:
                 if (
                     file_path.is_file()
                     and file_path.parent == self.AVAILABLE_SCRIPTS
@@ -282,7 +283,7 @@ class LauncherTray(QMainWindow):
         """Processes the "restart" command. Restarts scripts."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
-            if (file_path is not None):
+            if file_path is not None:
                 if (
                     file_path.is_file()
                     and file_path.parent == self.AVAILABLE_SCRIPTS
@@ -310,7 +311,7 @@ class LauncherTray(QMainWindow):
                 self.message_to_client.append("SUCCESS: Log of this tray launcher is shown.")
             else:
                 file_path = self.to_loaded_path(Path(path_str))
-                if (file_path is not None):
+                if file_path is not None:
                     if (
                         file_path.is_file()
                         and file_path.parent == self.AVAILABLE_SCRIPTS
@@ -339,7 +340,7 @@ class LauncherTray(QMainWindow):
         """Processes the "focus" command. Brings the scripts to the foreground."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
-            if (file_path is not None):
+            if file_path is not None:
                 if (
                     file_path.is_file()
                     and file_path.parent == self.AVAILABLE_SCRIPTS
