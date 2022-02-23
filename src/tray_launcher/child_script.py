@@ -10,27 +10,24 @@ class ChildScript:
 
     script_path_str = ""
 
-    outputs_file = None
-
-    childScript = None
-    childScript_PID = -1
-    childScript_PID_window_PID = -1
+    
 
     current_PIDs = []
-
+        
     def __init__(self, script_path_str):
-        self.script_path_str = '"' + script_path_str + '"'
-
-        self.USER_HOME = Path.home() / ".tray_launcher"
-        self.LOGS = self.USER_HOME / "logs"
+        self.script_path_str = script_path_str
+        self.child_script = None
+        self.child_script_PID = -1
 
     def start_script(self):
-        self.script_path = Path(self.script_path_str)
+        script_path = Path(self.script_path_str)
 
         t = _t.localtime(_t.time())
 
+        log_file = self.get_log_path()
+
         try:
-            log_directory = self.LOGS / (
+            log_directory = log_file / (
                 str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2)
             )
             log_directory.mkdir(parents=True, exist_ok=True)
@@ -39,7 +36,7 @@ class ChildScript:
             raise
 
         self.log_path = log_directory / "{}-{}_{}_{}.log".format(
-            self.script_path.stem,
+            script_path.stem,
             str(t.tm_hour).zfill(2),
             str(t.tm_min).zfill(2),
             str(t.tm_sec).zfill(2),
@@ -51,16 +48,16 @@ class ChildScript:
             print(err + ": Failed to open/create a file for outputs")
             raise
 
-        self.childScript = subprocess.Popen(
-            self.script_path_str,
+        self.child_script = subprocess.Popen(
+            '"' + self.script_path_str + '"',
             encoding=self.ENCODING,
             stdout=self.outputs_file,
             stderr=self.outputs_file,
             creationflags=subprocess.CREATE_NO_WINDOW,
         )
 
-        self.childScript_PID = self.childScript.pid
-        print("childScript_PID: " + str(self.childScript_PID))
+        self.child_script_PID = self.child_script.pid
+        print("child_script_PID: " + str(self.child_script_PID))
 
     def terminate_script(self):
         self.update_current_PIDs()
@@ -72,16 +69,21 @@ class ChildScript:
 
         try:
             self.outputs_file.close()
-            os.kill(self.childScript_PID, signal.SIGTERM)
+            os.kill(self.child_script_PID, signal.SIGTERM)
         except OSError:
             print("The Popen process is not running")
             return
+
+    def get_log_path(self):
+        user_home = Path.home() / ".tray_launcher"
+        log_file = user_home / "logs"
+        return log_file
 
     def is_active(self):
         """Checks if there is any subprocess still running."""
         self.update_current_PIDs()
 
-        if self.childScript.poll() is None:
+        if self.child_script.poll() is None:
             return True
         elif self.current_PIDs:
             return True
@@ -91,7 +93,7 @@ class ChildScript:
         self.current_PIDs = []
         wmic_ = subprocess.run(
             "wmic process where (ParentProcessId={}) get ProcessId".format(
-                str(self.childScript_PID)
+                str(self.child_script_PID)
             ),
             encoding=self.ENCODING,
             stdout=subprocess.PIPE,

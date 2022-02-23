@@ -316,7 +316,7 @@ class LauncherTray(QMainWindow):
                         and file_path.stem in self.currently_running_scripts
                     ):
                         self.show_logs(
-                            self.script_manager.currently_running_ChildScripts[
+                            self.script_manager.currently_running_child_scripts[
                                 self.currently_running_scripts[file_path.stem][0]
                             ].log_path
                         )
@@ -439,7 +439,7 @@ class LauncherTray(QMainWindow):
         logAction.triggered.connect(
             partial(
                 self.show_logs,
-                self.script_manager.currently_running_ChildScripts[timestamp].log_path,
+                self.script_manager.currently_running_child_scripts[timestamp].log_path,
             )
         )
         three_menu.insertAction(restartAction, logAction)
@@ -462,7 +462,7 @@ class LauncherTray(QMainWindow):
         logging.info(
             "{} was brought to the front.".format(args[0].stem)
             + " Processes with PIDs {} are running.".format(
-                self.script_manager.currently_running_ChildScripts[args[1]].current_PIDs
+                self.script_manager.currently_running_child_scripts[args[1]].current_PIDs
             )
         )
 
@@ -559,7 +559,7 @@ class LauncherTray(QMainWindow):
         for (
             timestamp,
             child_script_obj,
-        ) in self.script_manager.currently_running_ChildScripts.items():
+        ) in self.script_manager.currently_running_child_scripts.items():
             if not child_script_obj.is_active():
                 child_script_obj.outputs_file.close()
 
@@ -581,7 +581,7 @@ class LauncherTray(QMainWindow):
                 )
 
         for ts in to_del:
-            del self.script_manager.currently_running_ChildScripts[ts]
+            del self.script_manager.currently_running_child_scripts[ts]
 
         self.check_available_scripts()
 
