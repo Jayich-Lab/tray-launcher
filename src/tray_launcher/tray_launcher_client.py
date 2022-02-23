@@ -35,10 +35,13 @@ class TrayLauncherClient(QObject):
         if not success_connect:
             return False
         else:
-            instance.client.write(bytes(instance.command + "\n", encoding="ascii"))
-            instance.client.write(bytes((instance.data + "\n"), encoding="ascii"))
-            instance.client.waitForDisconnected()
-            return True
+            try:
+                instance.client.write(bytes(instance.command + "\n", encoding="ascii"))
+                instance.client.write(bytes((instance.data + "\n"), encoding="ascii"))
+                instance.client.waitForDisconnected()
+                return True
+            except Exception as e:
+                return False
 
     def attempt_connect(self):
         """Connects to the tray launcher server."""
