@@ -21,23 +21,23 @@ class TrayLauncherClient(QObject):
         self.command = command
         self.data = data
 
-    def check_connection(self):
+    @classmethod
+    def check_connection(cls):
         """Attempts to connect to the tray launcher TCP server
         to check if there is already one tray launcher instance running
         """
-        self.command = "test"
-        self.data = "empty"
-        self.client.connectToHost(
+        instance = cls("test", "empty")
+        instance.client.connectToHost(
             "127.0.0.1", int(os.environ.get("TRAY_LAUNCHER_PORT", 7686)), QIODevice.ReadWrite
         )
-        success_connect = self.client.waitForConnected()
+        success_connect = instance.client.waitForConnected()
 
         if not success_connect:
             return False
         else:
-            self.client.write(bytes(self.command + "\n", encoding="ascii"))
-            self.client.write(bytes((self.data + "\n"), encoding="ascii"))
-            self.client.waitForDisconnected()
+            instance.client.write(bytes(instance.command + "\n", encoding="ascii"))
+            instance.client.write(bytes((instance.data + "\n"), encoding="ascii"))
+            instance.client.waitForDisconnected()
             return True
 
     def attempt_connect(self):

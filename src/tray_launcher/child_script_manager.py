@@ -14,12 +14,14 @@ from tray_launcher import child_script
 
 
 class ChildScriptManager(QObject):
-    # key: timestamp
-    # value: ChildScript
-    currently_running_child_scripts = {}
+    
 
     def __init__(self):
         super().__init__()
+
+        # key: timestamp
+        # value: ChildScript
+        self.running_child_scripts = {}
 
     def run_new(self, args):
         """Starts a new script.
@@ -30,7 +32,7 @@ class ChildScriptManager(QObject):
         """
         c = child_script.ChildScript(str(args[0]))
         c.start_script()
-        self.currently_running_child_scripts[args[1]] = c
+        self.running_child_scripts[args[1]] = c
 
     def show(self, args):
         """Brings windows associated with a script to the foreground.
@@ -39,8 +41,8 @@ class ChildScriptManager(QObject):
             args: (Path, int), the path to the script,
                 the timestamp of the ChildScript.
         """
-        self.currently_running_child_scripts[args[1]].update_current_PIDs()
-        self.bring_to_front(self.currently_running_child_scripts[args[1]].current_PIDs)
+        self.running_child_scripts[args[1]].update_current_PIDs()
+        self.bring_to_front(self.running_child_scripts[args[1]].current_PIDs)
 
     def terminate(self, timestamp):
         """Terminates the script started at the time specified
@@ -49,8 +51,8 @@ class ChildScriptManager(QObject):
         Args:
             args: int, the timestamp of the ChildScript.
         """
-        self.currently_running_child_scripts[timestamp].terminate_script()
-        del self.currently_running_child_scripts[timestamp]
+        self.running_child_scripts[timestamp].terminate_script()
+        del self.running_child_scripts[timestamp]
 
     def get_hwnds_for_PID(self, pid):
         """Get WINDOW handles for windows associated with the given PID.

@@ -7,17 +7,12 @@ from pathlib import Path
 
 class ChildScript:
     ENCODING = "utf-8"
-
-    script_path_str = ""
-
-    
-
-    current_PIDs = []
         
     def __init__(self, script_path_str):
         self.script_path_str = script_path_str
         self.child_script = None
         self.child_script_PID = -1
+        self.current_PIDs = []
 
     def start_script(self):
         script_path = Path(self.script_path_str)

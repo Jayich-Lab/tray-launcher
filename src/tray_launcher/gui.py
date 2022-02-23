@@ -29,28 +29,18 @@ from tray_launcher import child_script, child_script_manager, tray_launcher_clie
 
 
 class LauncherTray(QMainWindow):
-    trayicon = None
-    script_manager = None
-    script_count = 0
-
-    # key: string:                          script.stem
-    # value: tuple (int, QMenu):            (timestamp, three_menu)
-    currently_running_scripts = {}
-
-    # key: script.stem
-    # value: QAction
-    available_scripts = {}
 
     def __init__(self):
-        self.HOME_PATH = Path(child_script.__file__).parent
-        self.USER = Path.home()
+        home_path = Path(child_script.__file__).parent
+        user_path = Path.home()
 
-        self.USER_HOME = self.USER / ".tray_launcher"
-        self.LOGS = self.USER_HOME / "logs"
-        self.AVAILABLE_SCRIPTS = self.USER_HOME / "scripts"
+        user_home = user_path / ".tray_launcher"
 
-        self.icon = str(self.HOME_PATH / "icons" / "tray_icon.png")
-        self.check_mark = str(self.HOME_PATH / "icons" / "check_mark.png")
+        self.LOGS = user_home / "logs"
+        self.AVAILABLE_SCRIPTS = user_home / "scripts"
+
+        self.icon = str(home_path / "icons" / "tray_icon.png")
+        self.check_mark = str(home_path / "icons" / "check_mark.png")
 
         super().__init__()
         self.script_manager = child_script_manager.ChildScriptManager()
@@ -75,10 +65,21 @@ class LauncherTray(QMainWindow):
             format="%(asctime)s %(message)s",
         )
         logging.info("Tray Launcher Started.")
-        self.initUI()
-        self.initServer()
 
-    def initServer(self):
+        self.script_count = 0
+
+        # key: string:                          script.stem
+        # value: tuple (int, QMenu):            (timestamp, three_menu)
+        self.currently_running_scripts = {}
+
+        # key: script.stem
+        # value: QAction
+        self.available_scripts = {}
+
+        self.init_ui()
+        self.init_server()
+
+    def init_server(self):
         self.message_to_client = []
 
         self.server = QTcpServer(self)
@@ -91,16 +92,16 @@ class LauncherTray(QMainWindow):
                 + ". See README.md to switch to an available port."
             )
             return
-        self.server.newConnection.connect(self.processConnection)
+        self.server.newConnection.connect(self.process_connection)
 
-    def initUI(self):
+    def init_ui(self):
         self.trayicon = QSystemTrayIcon(self)
         self.trayicon.setIcon(QIcon(self.icon))
         self.trayicon.setVisible(True)
 
         self.context_menu = QMenu(self)
         load_new_script = QAction("Load New Script(s)", self)
-        load_new_script.triggered.connect(partial(self.load_scripts_from_file_dialogue, self.USER))
+        load_new_script.triggered.connect(partial(self.load_scripts_from_file_dialogue, Path.home()))
 
         self.view_all = QMenu("Start a Script", self)
         self.add_available_scripts(self.view_all)
@@ -138,15 +139,15 @@ class LauncherTray(QMainWindow):
         super().resize(0, 0)
         self.trayicon.show()
 
-    def processConnection(self):
+    def process_connection(self):
         """Processes the list passed from the client, and writes response back."""
-        clientConnection = self.server.nextPendingConnection()
+        client_connection = self.server.nextPendingConnection()
 
-        clientConnection.waitForReadyRead()
+        client_connection.waitForReadyRead()
 
         data = []
-        while not clientConnection.atEnd():
-            data.append(str(clientConnection.readLine(), encoding="ascii")[0:-1])
+        while not client_connection.atEnd():
+            data.append(str(client_connection.readLine(), encoding="ascii")[0:-1])
 
         dispatchers = {
             "test": self.prcess_test,
@@ -168,9 +169,9 @@ class LauncherTray(QMainWindow):
         except KeyError:
             self.process_invalid_command(data)
 
-        self.write_to_client(clientConnection)
-        clientConnection.disconnected.connect(clientConnection.deleteLater)
-        clientConnection.disconnectFromHost()
+        self.write_to_client(client_connection)
+        client_connection.disconnected.connect(client_connection.deleteLater)
+        client_connection.disconnectFromHost()
 
     def prcess_test(self, data):
         """Processes the "test" command."""
@@ -180,7 +181,7 @@ class LauncherTray(QMainWindow):
         """Process the "start" command. Start new scripts."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
-            if not (file_path is None):
+            if (file_path is not None):
                 if self.run_new_file(file_path):
                     self.message_to_client.append("SUCCESS: {} is now running.".format(path_str))
                 else:
@@ -194,7 +195,7 @@ class LauncherTray(QMainWindow):
         """Process the "terminate" command. Terminate scripts that are running."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
-            if not (file_path is None):
+            if (file_path is not None):
                 if (
                     file_path.is_file()
                     and file_path.parent == self.AVAILABLE_SCRIPTS
@@ -281,7 +282,7 @@ class LauncherTray(QMainWindow):
         """Processes the "restart" command. Restarts scripts."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
-            if not (file_path is None):
+            if (file_path is not None):
                 if (
                     file_path.is_file()
                     and file_path.parent == self.AVAILABLE_SCRIPTS
@@ -309,14 +310,14 @@ class LauncherTray(QMainWindow):
                 self.message_to_client.append("SUCCESS: Log of this tray launcher is shown.")
             else:
                 file_path = self.to_loaded_path(Path(path_str))
-                if not (file_path is None):
+                if (file_path is not None):
                     if (
                         file_path.is_file()
                         and file_path.parent == self.AVAILABLE_SCRIPTS
                         and file_path.stem in self.currently_running_scripts
                     ):
                         self.show_logs(
-                            self.script_manager.currently_running_child_scripts[
+                            self.script_manager.running_child_scripts[
                                 self.currently_running_scripts[file_path.stem][0]
                             ].log_path
                         )
@@ -332,12 +333,13 @@ class LauncherTray(QMainWindow):
 
     def process_all_logs(self, data):
         self.show_logs(self.LOGS)
+        self.message_to_client.append("SUCCESS: all logs are shown.")
 
     def process_focus(self, data):
         """Processes the "focus" command. Brings the scripts to the foreground."""
         for path_str in data[1:]:
             file_path = self.to_loaded_path(Path(path_str))
-            if not (file_path is None):
+            if (file_path is not None):
                 if (
                     file_path.is_file()
                     and file_path.parent == self.AVAILABLE_SCRIPTS
@@ -386,7 +388,9 @@ class LauncherTray(QMainWindow):
         connection.write(block)
 
     def to_loaded_path(self, path_given):
-        """Returns a Path that resembles one pointing to the "scripts" directory
+        """Returns a Path that resembles one pointing to the "scripts" directory.
+            Changes the parent of the path_given to the "scripts" directory and modifies its
+            suffix to .bat
 
         Args:
             path_given: Path
@@ -439,7 +443,7 @@ class LauncherTray(QMainWindow):
         logAction.triggered.connect(
             partial(
                 self.show_logs,
-                self.script_manager.currently_running_child_scripts[timestamp].log_path,
+                self.script_manager.running_child_scripts[timestamp].log_path,
             )
         )
         three_menu.insertAction(restartAction, logAction)
@@ -462,7 +466,7 @@ class LauncherTray(QMainWindow):
         logging.info(
             "{} was brought to the front.".format(args[0].stem)
             + " Processes with PIDs {} are running.".format(
-                self.script_manager.currently_running_child_scripts[args[1]].current_PIDs
+                self.script_manager.running_child_scripts[args[1]].current_PIDs
             )
         )
 
@@ -559,7 +563,7 @@ class LauncherTray(QMainWindow):
         for (
             timestamp,
             child_script_obj,
-        ) in self.script_manager.currently_running_child_scripts.items():
+        ) in self.script_manager.running_child_scripts.items():
             if not child_script_obj.is_active():
                 child_script_obj.outputs_file.close()
 
@@ -581,7 +585,7 @@ class LauncherTray(QMainWindow):
                 )
 
         for ts in to_del:
-            del self.script_manager.currently_running_child_scripts[ts]
+            del self.script_manager.running_child_scripts[ts]
 
         self.check_available_scripts()
 
@@ -623,7 +627,6 @@ class LauncherTray(QMainWindow):
 
         if not (file_path.is_file()):
             logging.info("Only .bat file is accepted.")
-            print("Only .bat file is accepted.")
             return False
 
         elif file_path.parent == self.AVAILABLE_SCRIPTS:
@@ -750,9 +753,9 @@ def main():
 
 
 def run_pythonw():
-    instance_already_exists = tray_launcher_client.TrayLauncherClient(None, None).check_connection()
-    if instance_already_exists is True:
-        print("There is already an instance of tray launcher running.")
+    instance_already_exists = tray_launcher_client.TrayLauncherClient.check_connection()
+    if instance_already_exists:
+        print("There is already an instance of tray launcher running. Terminating now.")
         return
 
     HOME_PATH = Path(__file__).parent / "gui.py"
