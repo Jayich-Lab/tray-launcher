@@ -148,42 +148,33 @@ class LauncherTray(QMainWindow):
         while not clientConnection.atEnd():
             data.append(str(clientConnection.readLine(), encoding="ascii")[0:-1])
 
-        if data[0] == "test":
-            self.message_to_client = " "
+        dispatchers = {
+            "test": self.prcess_test,
+            "start": self.process_start,
+            "terminate": self.process_terminate,
+            "list": self.process_list,
+            "list_current": self.process_list_current,
+            "load": self.process_load,
+            "restart": self.process_restart,
+            "log": self.process_log,
+            "all_logs": self.process_all_logs,
+            "focus": self.process_focus,
+            "quit": self.process_quit,
+        }
 
-        elif data[0] == "start":
-            self.process_start(data)
-
-        elif data[0] == "terminate":
-            self.process_terminate(data)
-
-        elif data[0] == "list":
-            self.process_list()
-
-        elif data[0] == "list_current":
-            self.process_list_current()
-
-        elif data[0] == "load":
-            self.process_load(data)
-
-        elif data[0] == "restart":
-            self.process_restart(data)
-
-        elif data[0] == "log":
-            self.process_log(data)
-
-        elif data[0] == "all_logs":
-            self.show_logs(self.LOGS)
-
-        elif data[0] == "focus":
-            self.process_focus(data)
-
-        elif data[0] == "quit":
-            self.quick_quit()
+        try:
+            dispatcher = dispatchers[data[0]]
+            dispatcher(data)
+        except KeyError:
+            self.process_invalid_command(data)
 
         self.write_to_client(clientConnection)
         clientConnection.disconnected.connect(clientConnection.deleteLater)
         clientConnection.disconnectFromHost()
+
+    def prcess_test(self, data):
+        """Processes the "test" command."""
+        self.message_to_client.append(" ")
 
     def process_start(self, data):
         """Process the "start" command. Start new scripts."""
@@ -223,7 +214,7 @@ class LauncherTray(QMainWindow):
             else:
                 self.message_to_client.append("{} is not valid.".format(path_str))
 
-    def process_list(self):
+    def process_list(self, data):
         """Processes the "list -a" command. Writes loaded scripts' stems to the string
         which will be written back to the client.
         """
@@ -251,7 +242,7 @@ class LauncherTray(QMainWindow):
                 if file_path.is_file:
                     file_path.unlink()
 
-    def process_list_current(self):
+    def process_list_current(self, data):
         """Processes the "list -r" command. Writes currently running scripts' stems to the string
         which will be written back to the client.
         """
@@ -339,6 +330,9 @@ class LauncherTray(QMainWindow):
                 else:
                     self.message_to_client.append("{} is not valid.".format(path_str))
 
+    def process_all_logs(self, data):
+        self.show_logs(self.LOGS)
+
     def process_focus(self, data):
         """Processes the "focus" command. Brings the scripts to the foreground."""
         for path_str in data[1:]:
@@ -359,6 +353,18 @@ class LauncherTray(QMainWindow):
                     self.message_to_client.append("{} is not valid.".format(path_str))
             else:
                 self.message_to_client.append("{} is not valid.".format(path_str))
+
+    def process_quit(self, data):
+        """Processes the "quit" command. Quits the tray launcher without prompting."""
+        for tuple in self.currently_running_scripts.values():
+            self.script_manager.terminate(tuple[0])
+        logging.info("Tray Launcher Exited.")
+        self.script_manager.deleteLater()
+        qApp.quit()
+
+    def process_invalid_command(self, data):
+        """Processes an invalid command."""
+        self.message_to_client.append("{} is an invalid command.".format(data[0]))
 
     def write_to_client(self, connection):
         """Passes the string (self.message_to_client) created by the server to the client."""
@@ -700,14 +706,6 @@ class LauncherTray(QMainWindow):
             logging.info("Tray Launcher Exited.")
             self.script_manager.deleteLater()
             qApp.quit()
-
-    def quick_quit(self):
-        """Quits the tray launcher without prompting a question messagebox."""
-        for tuple in self.currently_running_scripts.values():
-            self.script_manager.terminate(tuple[0])
-        logging.info("Tray Launcher Exited.")
-        self.script_manager.deleteLater()
-        qApp.quit()
 
     def show_logs(self, log_path):
         """Displays the file specified.
