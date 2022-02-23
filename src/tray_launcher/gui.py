@@ -737,8 +737,8 @@ class LauncherTray(QMainWindow):
             QLabel(
                 '1. Load scripts by clicking the "Load New Scripts(s)" option \nand'
                 + " select scripts you wish to run in the future. \n2. Move over"
-                + ' "Start a Script" to select one script to run. \n3. If a problem'
-                + " occurs, go find Tommy."
+                + ' "Start a Script" to select one script to run. \n 3. To use CLI,'
+                + ' run "launcher -h" to view all allowed commands.'
             )
         )
         self.help_window.setLayout(layout)

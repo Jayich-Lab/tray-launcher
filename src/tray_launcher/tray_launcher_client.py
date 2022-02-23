@@ -40,7 +40,7 @@ class TrayLauncherClient(QObject):
                 instance.client.write(bytes((instance.data + "\n"), encoding="ascii"))
                 instance.client.waitForDisconnected()
                 return True
-            except Exception as e:
+            except Exception:
                 return False
 
     def attempt_connect(self):
