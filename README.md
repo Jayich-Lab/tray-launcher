@@ -11,7 +11,7 @@ A launcher resided in the task bar for managing .bat scripts.
 
 ## Usage
 
-To start the *tray launcher*, first make sure you are in the Python environment variable where *tray-launcher* is installed. Then, running `tray-launcher` will show a small icon in the taskbar.
+To start the *tray launcher*, first make sure you are in the Python environment variable where *tray-launcher* is installed. Then, running `launcher run` will show a small icon in the taskbar.
 
 *tray launcher* comes with a CLI. Enter `launcher -h` to learn how it works.
 
