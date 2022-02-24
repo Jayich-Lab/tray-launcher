@@ -10,13 +10,12 @@ class ChildScript:
 
     def __init__(self, script_path_str):
         self.script_path_str = script_path_str
+        self.script_path = Path(self.script_path_str)
         self.child_script = None
         self.child_script_PID = -1
         self.current_PIDs = []
 
     def start_script(self):
-        script_path = Path(self.script_path_str)
-
         t = _t.localtime(_t.time())
 
         log_file = self.get_log_path()
@@ -31,7 +30,7 @@ class ChildScript:
             raise
 
         self.log_path = log_directory / "{}-{}_{}_{}.log".format(
-            script_path.stem,
+            self.script_path.stem,
             str(t.tm_hour).zfill(2),
             str(t.tm_min).zfill(2),
             str(t.tm_sec).zfill(2),
