@@ -9,10 +9,11 @@ from functools import partial
 
 from PyQt5.QtNetwork import QHostAddress, QTcpServer
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, Qt,  QObject
+from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, Qt, QObject
 from PyQt5.QtWidgets import QApplication, qApp
 
 from tray_launcher import gui, tray_launcher_client
+
 
 class TrayLauncherCLI(QObject):
     def __init__(self):
@@ -239,7 +240,9 @@ class TrayLauncherCLI(QObject):
                     and file_path.parent == self.gui.AVAILABLE_SCRIPTS
                     and file_path.stem in self.gui.currently_running_scripts
                 ):
-                    self.gui.show_script((file_path, self.gui.currently_running_scripts[file_path.stem][0]))
+                    self.gui.show_script(
+                        (file_path, self.gui.currently_running_scripts[file_path.stem][0])
+                    )
                     self.message_to_client.append(
                         "SUCCESS: {} is now brought to the front.".format(path_str)
                     )
@@ -282,12 +285,12 @@ class TrayLauncherCLI(QObject):
         connection.write(block)
 
 
-
 def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     lc = TrayLauncherCLI()
     sys.exit(app.exec_())
+
 
 def run_pythonw():
     instance_already_exists = tray_launcher_client.TrayLauncherClient.check_connection()
