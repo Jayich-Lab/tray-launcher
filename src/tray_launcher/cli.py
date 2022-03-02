@@ -6,7 +6,7 @@ import time as _t
 from functools import partial
 from pathlib import Path
 
-from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, QObject, Qt
+from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, QObject
 from PyQt5.QtGui import QIcon
 from PyQt5.QtNetwork import QHostAddress, QTcpServer
 from PyQt5.QtWidgets import QApplication, qApp
@@ -289,6 +289,7 @@ def main():
     app.setStyle("Fusion")
     lc = TrayLauncherCLI()
     sys.exit(app.exec_())
+    lc.deleteLater()
 
 
 def run_pythonw():
