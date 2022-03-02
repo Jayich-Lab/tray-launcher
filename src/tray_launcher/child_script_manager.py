@@ -25,32 +25,32 @@ class ChildScriptManager(QObject):
         """Starts a new script.
 
         Args:
-            args: (Path, int), the path to the script,
-                the timestamp of the ChildScript.
+            args: ((Path, int), str), the path to the script,
+                the timestamp of the ChildScript. Plus the path to the log file for the tray launcher.
         """
-        c = child_script.ChildScript(str(args[0]))
+        c = child_script.ChildScript(str(args[0][0]), args[1])
         c.start_script()
-        self.running_child_scripts[args[1]] = c
+        self.running_child_scripts[args[0][1]] = c
 
     def show(self, args):
         """Brings windows associated with a script to the foreground.
 
         Args:
-            args: (Path, int), the path to the script,
-                the timestamp of the ChildScript.
+            args: ((Path, int), str), the path to the script,
+                the timestamp of the ChildScript. Plus the path to the log file for the tray launcher.
         """
-        self.running_child_scripts[args[1]].update_current_PIDs()
-        self.bring_to_front(self.running_child_scripts[args[1]].current_PIDs)
+        self.running_child_scripts[args[0][1]].update_current_PIDs()
+        self.bring_to_front(self.running_child_scripts[args[0][1]].current_PIDs)
 
     def terminate(self, timestamp):
         """Terminates the script started at the time specified
-            by the argument timestamp.
+            by the argument timestamp. Plus the path to the log file for the tray launcher.
 
         Args:
-            args: int, the timestamp of the ChildScript.
+            args: (int, str), the timestamp of the ChildScript.
         """
-        self.running_child_scripts[timestamp].terminate_script()
-        del self.running_child_scripts[timestamp]
+        self.running_child_scripts[timestamp[0]].terminate_script()
+        del self.running_child_scripts[timestamp[0]]
 
     def get_hwnds_for_PID(self, pid):
         """Get WINDOW handles for windows associated with the given PID.

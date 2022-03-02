@@ -1,6 +1,7 @@
 import os
 import signal
 import subprocess
+import logging
 import time as _t
 from pathlib import Path
 
@@ -8,17 +9,24 @@ from pathlib import Path
 class ChildScript:
     ENCODING = "utf-8"
 
-    def __init__(self, script_path_str):
+    def __init__(self, script_path_str, tray_launcher_log):
         self.script_path_str = script_path_str
         self.script_path = Path(self.script_path_str)
         self.child_script = None
         self.child_script_PID = -1
         self.current_PIDs = []
+        self.tray_launcher_log = tray_launcher_log
 
     def start_script(self):
         t = _t.localtime(_t.time())
 
         log_file = self.get_log_path()
+
+        logging.basicConfig(
+            filename=self.tray_launcher_log,
+            level=logging.INFO,
+            format="%(asctime)s %(message)s",
+        )
 
         try:
             log_directory = log_file / (
@@ -26,7 +34,7 @@ class ChildScript:
             )
             log_directory.mkdir(parents=True, exist_ok=True)
         except Exception as err:
-            print(err + ": Failed to create new directory for outputs")
+            logging.info(err + ": Failed to create new directory for ChildScript outputs.")
             raise
 
         self.log_path = log_directory / "{}-{}_{}_{}.log".format(
@@ -39,7 +47,7 @@ class ChildScript:
         try:
             self.outputs_file = open(self.log_path, "a")
         except Exception as err:
-            print(err + ": Failed to open/create a file for outputs")
+            logging.info(err + ": Failed to open/create a file for ChildScript outputs.")
             raise
 
         self.child_script = subprocess.Popen(
@@ -51,7 +59,6 @@ class ChildScript:
         )
 
         self.child_script_PID = self.child_script.pid
-        print("child_script_PID: " + str(self.child_script_PID))
 
     def terminate_script(self):
         self.update_current_PIDs()
@@ -59,13 +66,21 @@ class ChildScript:
             for pid in self.current_PIDs:
                 subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)])
         except Exception:
-            print("Error when terminating child processes.")
+            logging.info(
+                "Child Script PID: "
+                + str(self.child_script_PID)
+                + ": Error when terminating child processes."
+            )
 
         try:
             self.outputs_file.close()
             os.kill(self.child_script_PID, signal.SIGTERM)
         except OSError:
-            print("The Popen process is not running")
+            logging.info(
+                "Child Script PID: "
+                + str(self.child_script_PID)
+                + ": The Popen process is not running."
+            )
             return
 
     def get_log_path(self):

@@ -46,19 +46,22 @@ class TrayLauncherGUI(QMainWindow):
             )
             self._log_directory.mkdir(parents=True, exist_ok=True)
         except Exception as err:
-            print(err + ": Failed to create new directory for outputs")
+            # print(err + ": Failed to create new directory for outputs")
             raise
+
+        self.tray_launcher_log = self._log_directory / "tray_launcher.log"
+        logging.basicConfig(
+            filename=self.tray_launcher_log,
+            level=logging.INFO,
+            format="%(asctime)s %(message)s",
+        )
 
         try:
             self.AVAILABLE_SCRIPTS.mkdir(parents=True, exist_ok=True)
         except Exception as err:
-            print(err + ": Failed to create new directory for available scripts")
+            logging.info(err + ": Failed to create new directory for available scripts")
             raise
-        logging.basicConfig(
-            filename=self._log_directory / "tray_launcher.log",
-            level=logging.INFO,
-            format="%(asctime)s %(message)s",
-        )
+
         logging.info("Tray Launcher Started.")
 
         self.script_count = 0
@@ -244,6 +247,7 @@ class TrayLauncherGUI(QMainWindow):
                 in case of func=terminate_script, args: int
             func: an instance function of ChildScriptManager.
         """
+        args = (args, self.tray_launcher_log)
         dummy_action = QAction(self)
         dummy_action.triggered.connect(partial(func, args))
         dummy_action.trigger()
@@ -409,7 +413,7 @@ class TrayLauncherGUI(QMainWindow):
                         self.prepare_context_menu()
                         return True
                     except _su.SameFileError:
-                        print("Same File!")
+                        logging.info("Same file was uploaded!")
                         return True
                 else:
                     return False

@@ -244,16 +244,18 @@ def run_pythonw():
     HOME_PATH = Path(__file__).parent / "cli.py"
 
     t = _t.localtime(_t.time())
+
+    log_directory = (
+        Path.home()
+        / ".tray_launcher"
+        / "logs"
+        / (str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2))
+    )
+
     try:
-        log_directory = (
-            Path.home()
-            / ".tray_launcher"
-            / "logs"
-            / (str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2))
-        )
         log_directory.mkdir(parents=True, exist_ok=True)
     except Exception as err:
-        print(err + ": Failed to create new directory for outputs")
+        print(err + ": Failed to create new directory for tray launcher outputs")
         raise
     with open(log_directory / "tray_launcher.log", "a") as launcher_log:
         subprocess.Popen(
