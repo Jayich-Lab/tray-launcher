@@ -1,18 +1,13 @@
 import logging
 import os
 import shutil as _su
-import subprocess
-import sys
 import time as _t
 from functools import partial
 from pathlib import Path
-
-from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, Qt
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtNetwork import QHostAddress, QTcpServer
 from PyQt5.QtWidgets import (
     QAction,
-    QApplication,
     QDesktopWidget,
     QFileDialog,
     QLabel,
@@ -24,7 +19,6 @@ from PyQt5.QtWidgets import (
     QWidget,
     qApp,
 )
-
 from tray_launcher import child_script, child_script_manager
 
 
