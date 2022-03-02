@@ -1,7 +1,7 @@
+import logging
 import os
 import signal
 import subprocess
-import logging
 import time as _t
 from pathlib import Path
 

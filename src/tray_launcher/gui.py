@@ -45,7 +45,7 @@ class TrayLauncherGUI(QMainWindow):
                 str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2)
             )
             self._log_directory.mkdir(parents=True, exist_ok=True)
-        except Exception as err:
+        except Exception:
             # print(err + ": Failed to create new directory for outputs")
             raise
 
