@@ -1,6 +1,6 @@
 import argparse
 
-from tray_launcher import gui, tray_launcher_client
+from tray_launcher import tray_launcher_client, cli
 
 
 def get_parser():
@@ -87,7 +87,7 @@ def get_print_pre_command(launcher, scripts):
 
 def dispatch_command(args):
     if args.launcher == "run":
-        gui.run_pythonw()
+        cli.run_pythonw()
         return
 
     print_pre_command = ""

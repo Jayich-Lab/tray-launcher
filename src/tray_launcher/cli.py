@@ -9,13 +9,14 @@ from functools import partial
 
 from PyQt5.QtNetwork import QHostAddress, QTcpServer
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, Qt
+from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, Qt,  QObject
 from PyQt5.QtWidgets import QApplication, qApp
 
 from tray_launcher import gui, tray_launcher_client
 
-class TrayLauncherCLI():
+class TrayLauncherCLI(QObject):
     def __init__(self):
+        super().__init__()
         self.message_to_client = []
 
         self.server = QTcpServer(self)
@@ -30,7 +31,7 @@ class TrayLauncherCLI():
             return
         self.server.newConnection.connect(self.process_connection)
 
-        self.gui = gui.TrayLauncher()
+        self.gui = gui.TrayLauncherGUI()
 
     def process_connection(self):
         """Processes the list passed from the client, and writes response back."""
@@ -73,7 +74,7 @@ class TrayLauncherCLI():
     def process_start(self, data):
         """Process the "start" command. Start new scripts."""
         for path_str in data[1:]:
-            file_path = self.to_loaded_path(Path(path_str))
+            file_path = self.gui.to_loaded_path(Path(path_str))
             if file_path is not None:
                 if self.gui.run_new_file(file_path):
                     self.message_to_client.append("SUCCESS: {} is now running.".format(path_str))
@@ -87,7 +88,7 @@ class TrayLauncherCLI():
     def process_terminate(self, data):
         """Process the "terminate" command. Terminate scripts that are running."""
         for path_str in data[1:]:
-            file_path = self.to_loaded_path(Path(path_str))
+            file_path = self.gui.to_loaded_path(Path(path_str))
             if file_path is not None:
                 if (
                     file_path.is_file()
@@ -174,7 +175,7 @@ class TrayLauncherCLI():
     def process_restart(self, data):
         """Processes the "restart" command. Restarts scripts."""
         for path_str in data[1:]:
-            file_path = self.to_loaded_path(Path(path_str))
+            file_path = self.gui.to_loaded_path(Path(path_str))
             if file_path is not None:
                 if (
                     file_path.is_file()
@@ -202,7 +203,7 @@ class TrayLauncherCLI():
                 self.gui.show_logs(self.gui._log_directory / "tray_launcher.log")
                 self.message_to_client.append("SUCCESS: Log of this tray launcher is shown.")
             else:
-                file_path = self.to_loaded_path(Path(path_str))
+                file_path = self.gui.to_loaded_path(Path(path_str))
                 if file_path is not None:
                     if (
                         file_path.is_file()
@@ -231,7 +232,7 @@ class TrayLauncherCLI():
     def process_focus(self, data):
         """Processes the "focus" command. Brings the scripts to the foreground."""
         for path_str in data[1:]:
-            file_path = self.to_loaded_path(Path(path_str))
+            file_path = self.gui.to_loaded_path(Path(path_str))
             if file_path is not None:
                 if (
                     file_path.is_file()
@@ -280,19 +281,6 @@ class TrayLauncherCLI():
         out.writeUInt16(block.size() - 2)
         connection.write(block)
 
-    def to_loaded_path(self, path_given):
-        """Returns a Path that resembles one pointing to the "scripts" directory.
-            Changes the parent of the path_given to the "scripts" directory and modifies its
-            suffix to .bat
-
-        Args:
-            path_given: Path
-        """
-        try:
-            loaded_path = Path(self.gui.AVAILABLE_SCRIPTS / path_given).with_suffix(".bat")
-        except ValueError:
-            return None
-        return loaded_path
 
 
 def main():
@@ -307,7 +295,7 @@ def run_pythonw():
         print("There is already an instance of tray launcher running. Terminating now.")
         return
 
-    HOME_PATH = Path(__file__).parent / "gui.py"
+    HOME_PATH = Path(__file__).parent / "cli.py"
 
     t = _t.localtime(_t.time())
     try:
