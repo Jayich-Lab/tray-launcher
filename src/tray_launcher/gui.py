@@ -143,9 +143,6 @@ class TrayLauncherGUI(QMainWindow):
         self.prepare_context_menu()
 
         if script_path.stem in self.currently_running_scripts:
-            self.message_to_client.append(
-                "Cannot run a script with the same stem as one of the currently running scripts!"
-            )
             return
 
         timestamp = _t.time()
@@ -153,7 +150,7 @@ class TrayLauncherGUI(QMainWindow):
         three_menu = QMenu(script_path.stem, self)
 
         showAction = QAction("Show", self)
-        showAction.triggered.connect(partial(self.show_script, args))
+        showAction.triggered.connect(partial(self.show_script, (args, three_menu)))
         three_menu.addAction(showAction)
 
         restartAction = QAction("Restart", self)
@@ -191,14 +188,15 @@ class TrayLauncherGUI(QMainWindow):
         """Bring windows associated with a script to the foreground, if any.
 
         Args:
-            args: (Path, int), the path to the script, the timestamp of the ChildScript.
+            args: ((Path, int), QMenu), the path to the script, the timestamp of the ChildScript,
+                and the QMenu associated with this script.
         """
-        self.run_in_manager(args, self.script_manager.show)
+        self.run_in_manager(args[0], self.script_manager.show)
 
         logging.info(
-            "{} was brought to the front.".format(args[0].stem)
+            "{} was brought to the front.".format(args[0][0].stem)
             + " Processes with PIDs {} are running.".format(
-                self.script_manager.running_child_scripts[args[1]].current_PIDs
+                self.script_manager.running_child_scripts[args[0][1]].current_PIDs
             )
         )
 
@@ -225,9 +223,6 @@ class TrayLauncherGUI(QMainWindow):
                 self.available_scripts[(args[0][0]).stem].setEnabled(True)
 
             logging.info("{} was terminated through Tray Launcher.".format(args[0][0].stem))
-
-        else:
-            self.message_to_client.append("{} is not running.".format(args[0][0].stem))
 
     def restart_script(self, args):
         """Restarts a script.

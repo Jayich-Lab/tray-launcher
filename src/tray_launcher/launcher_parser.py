@@ -45,10 +45,7 @@ def get_parser():
 
     p_log = launcher.add_parser(
         "log",
-        help=(
-            'Views scripts\' logs. Use "launcher log tray-launcher"'
-            " to view the log of the tray launcher"
-        ),
+        help=("Views scripts' logs."),
     )
     p_log.add_argument(
         "scripts",
