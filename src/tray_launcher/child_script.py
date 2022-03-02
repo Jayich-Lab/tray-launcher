@@ -34,7 +34,7 @@ class ChildScript:
             )
             log_directory.mkdir(parents=True, exist_ok=True)
         except Exception as err:
-            logging.info(err + ": Failed to create new directory for ChildScript outputs.")
+            logging.error(err + ": Failed to create new directory for ChildScript outputs.")
             raise
 
         self.log_path = log_directory / "{}-{}_{}_{}.log".format(
@@ -47,7 +47,7 @@ class ChildScript:
         try:
             self.outputs_file = open(self.log_path, "a")
         except Exception as err:
-            logging.info(err + ": Failed to open/create a file for ChildScript outputs.")
+            logging.error(err + ": Failed to open/create a file for ChildScript outputs.")
             raise
 
         self.child_script = subprocess.Popen(
@@ -66,7 +66,7 @@ class ChildScript:
             for pid in self.current_PIDs:
                 subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)])
         except Exception:
-            logging.info(
+            logging.error(
                 "Child Script PID: "
                 + str(self.child_script_PID)
                 + ": Error when terminating child processes."
@@ -76,7 +76,7 @@ class ChildScript:
             self.outputs_file.close()
             os.kill(self.child_script_PID, signal.SIGTERM)
         except OSError:
-            logging.info(
+            logging.error(
                 "Child Script PID: "
                 + str(self.child_script_PID)
                 + ": The Popen process is not running."

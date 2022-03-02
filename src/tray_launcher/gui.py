@@ -59,7 +59,7 @@ class TrayLauncherGUI(QMainWindow):
         try:
             self.AVAILABLE_SCRIPTS.mkdir(parents=True, exist_ok=True)
         except Exception as err:
-            logging.info(err + ": Failed to create new directory for available scripts")
+            logging.error(err + ": Failed to create new directory for available scripts")
             raise
 
         logging.info("Tray Launcher Started.")
