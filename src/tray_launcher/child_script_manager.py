@@ -26,7 +26,7 @@ class ChildScriptManager(QObject):
 
         Args:
             args: ((Path, int), str), the path to the script,
-                the timestamp of the ChildScript. 
+                the timestamp of the ChildScript.
                 Plus the path to the log file for the tray launcher.
         """
         c = child_script.ChildScript(str(args[0][0]), args[1])
@@ -38,7 +38,7 @@ class ChildScriptManager(QObject):
 
         Args:
             args: ((Path, int), str), the path to the script,
-                the timestamp of the ChildScript. 
+                the timestamp of the ChildScript.
                 Plus the path to the log file for the tray launcher.
         """
         self.running_child_scripts[args[0][1]].update_current_PIDs()
