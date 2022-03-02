@@ -1,15 +1,14 @@
 import logging
 import os
-import sys
 import subprocess
+import sys
 import time as _t
-
-from pathlib import Path
 from functools import partial
+from pathlib import Path
 
-from PyQt5.QtNetwork import QHostAddress, QTcpServer
+from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, QObject, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, Qt, QObject
+from PyQt5.QtNetwork import QHostAddress, QTcpServer
 from PyQt5.QtWidgets import QApplication, qApp
 
 from tray_launcher import gui, tray_launcher_client

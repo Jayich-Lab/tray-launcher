@@ -1,6 +1,6 @@
 import argparse
 
-from tray_launcher import tray_launcher_client, cli
+from tray_launcher import cli, tray_launcher_client
 
 
 def get_parser():
