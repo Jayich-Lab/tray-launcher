@@ -9,24 +9,23 @@ from pathlib import Path
 class ChildScript:
     ENCODING = "utf-8"
 
-    def __init__(self, script_path_str, tray_launcher_log):
+    def __init__(self, script_path_str, logging_log):
         self.script_path_str = script_path_str
         self.script_path = Path(self.script_path_str)
         self.child_script = None
         self.child_script_PID = -1
         self.current_PIDs = []
-        self.tray_launcher_log = tray_launcher_log
+
+        logging.basicConfig(
+            filename=logging_log,
+            level=logging.INFO,
+            format="%(asctime)s %(message)s",
+        )
 
     def start_script(self):
         t = _t.localtime(_t.time())
 
         log_file = self.get_log_path()
-
-        logging.basicConfig(
-            filename=self.tray_launcher_log,
-            level=logging.INFO,
-            format="%(asctime)s %(message)s",
-        )
 
         try:
             log_directory = log_file / (

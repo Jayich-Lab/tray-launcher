@@ -29,11 +29,11 @@ class TrayLauncherCLI(QObject):
                 + ". See README.md to switch to an available port."
             )
             return
-        self.server.newConnection.connect(self.process_connection)
+        self.server.newConnection.connect(self.connection)
 
         self.gui = gui.TrayLauncherGUI()
 
-    def process_connection(self):
+    def connection(self):
         """Processes the list passed from the client, and writes response back."""
         client_connection = self.server.nextPendingConnection()
 
@@ -94,7 +94,7 @@ class TrayLauncherCLI(QObject):
     def terminate(self, data):
         """Process the "terminate" command. Terminate scripts that are running."""
         for path_str in data[1:]:
-            self.on_running_script(self.gui.terminate_script, path_str, " is terminated.")
+            self._on_running_script(self.gui.terminate_script, path_str, " is terminated.")
 
     def list_all(self, data):
         """Processes the "list -a" command. Writes loaded scripts' stems to the string
@@ -145,12 +145,12 @@ class TrayLauncherCLI(QObject):
     def restart(self, data):
         """Processes the "restart" command. Restarts scripts."""
         for path_str in data[1:]:
-            self.on_running_script(self.gui.restart_script, path_str, " is restarted.")
+            self._on_running_script(self.gui.restart_script, path_str, " is restarted.")
 
     def log(self, data):
         """Processes the "log" command. Brings up the log file of the scripts."""
         for path_str in data[1:]:
-            self.on_running_script(self.gui.show_logs, path_str, "")
+            self._on_running_script(self.gui.show_logs, path_str, "")
 
     def all_logs(self, data):
         self.gui.show_logs(self.gui.LOGS)
@@ -159,7 +159,7 @@ class TrayLauncherCLI(QObject):
     def focus(self, data):
         """Processes the "focus" command. Brings the scripts to the foreground."""
         for path_str in data[1:]:
-            self.on_running_script(self.gui.show_script, path_str, " is brought to the front.")
+            self._on_running_script(self.gui.show_script, path_str, " is brought to the front.")
 
     def quit(self, data):
         """Processes the "quit" command. Quits the tray launcher without prompting."""
@@ -173,7 +173,7 @@ class TrayLauncherCLI(QObject):
         """Processes an invalid command."""
         self.message_to_client.append("{} is an invalid command.".format(data[0]))
 
-    def on_running_script(self, func, path_str, success_message):
+    def _on_running_script(self, func, path_str, success_message):
         file_path = self.gui.to_loaded_path(Path(path_str))
         if file_path is not None:
             if (
