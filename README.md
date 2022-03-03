@@ -26,8 +26,10 @@ The *tray launcher* will list all scripts you started and are currently running.
 
 ## Notes
 
-1. The *tray launcher* listens to `127.0.0.1:7686`. If this port is not available, the command line interface will not work. You need to go to control panel, create a new environment variable named `TRAY_LAUNCHER_PORT` and set its value to a port number that is available on your device.
+1. The *tray launcher* only works on Windows. 
 
-2. If the *tray launcher* crashes, scripts started via the *tray launcher* will NOT be terminated.
+2. The *tray launcher* listens to `127.0.0.1:7686`. If this port is not available, the command line interface will not work. You need to go to control panel, create a new environment variable named `TRAY_LAUNCHER_PORT` and set its value to a port number that is available on your device.
 
-3. There will be an expected delay when you run "launcher run".
+3. If the *tray launcher* crashes, scripts started via the *tray launcher* will NOT be terminated.
+
+4. There will be an expected delay when you run "launcher run".
