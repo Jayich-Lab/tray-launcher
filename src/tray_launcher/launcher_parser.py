@@ -1,6 +1,6 @@
 import argparse
 
-from tray_launcher import gui, tray_launcher_client
+from tray_launcher import cli, tray_launcher_client
 
 
 def get_parser():
@@ -45,10 +45,7 @@ def get_parser():
 
     p_log = launcher.add_parser(
         "log",
-        help=(
-            'Views scripts\' logs. Use "launcher log tray-launcher"'
-            " to view the log of the tray launcher"
-        ),
+        help=("Views scripts' logs."),
     )
     p_log.add_argument(
         "scripts",
@@ -87,7 +84,7 @@ def get_print_pre_command(launcher, scripts):
 
 def dispatch_command(args):
     if args.launcher == "run":
-        gui.run_pythonw()
+        cli.run_pythonw()
         return
 
     print_pre_command = ""
