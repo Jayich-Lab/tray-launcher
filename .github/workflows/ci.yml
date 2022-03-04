@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      PYTHON_VERSION_MAJ_MIN: '3.10'
       FORCE_COLOR: '1'
 
     steps:
