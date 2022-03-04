@@ -18,12 +18,6 @@ jobs:
     - name: Set up Python and nox
       uses: excitedleigh/setup-nox@v2
 
-    - name: Cache nox venvs
-      uses: actions/cache@v2
-      with:
-        path: .nox
-        key: nox-${{ runner.os }}-${{ hashFiles('noxfile.py', '.github/workflows/ci.yml') }}
-
     - name: Lint
       run: |
-        nox -rs lint
+        nox -s lint
