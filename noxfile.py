@@ -24,7 +24,7 @@ def fmt(session: nox.Session) -> None:
 def lint(session: nox.Session) -> None:
     """Lint files."""
     session.install(
-        "flake8-black==0.2.4",
+        "flake8-black",
         "flake8-isort",
         "flake8",
         "flake8-bugbear",
