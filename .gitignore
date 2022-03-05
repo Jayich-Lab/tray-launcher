@@ -1,0 +1,13 @@
+# Python basics
+*.py[cod]
+__pycache__/
+
+# Python packaging
+*.egg-info/
+/build/
+/dist/
+
+# dev tooling
+/.venv/
+/.nox/
+/.vscode/

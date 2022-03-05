@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      FORCE_COLOR: '1'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up Python and nox
+      uses: excitedleigh/setup-nox@v2
+
+    - name: Lint
+      run: |
+        nox -s lint
