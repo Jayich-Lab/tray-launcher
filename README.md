@@ -31,6 +31,6 @@ To run a script, select it in the **Start a Script** submenu from the context me
 
 A log for the tray-launcher and associated *.bat* scripts will be saved under `%USERPROFILE%\.tray_launcher\logs`.
 
-In case of *tray-launcher* crashing, scripts started via *tray-launcher* will NOT be terminated.
+In case of *tray-launcher* crashing, scripts started via *tray-launcher* will **not** terminate.
 
 There is an expected delay when executing "launcher run".
