@@ -7,6 +7,10 @@
 
 A launcher that resides in the Windows taskbar for managing .bat scripts.
 
+<img src="tray_launcher_at_work.png" width="620" height="456">
+<img src="tray_launcher_at_work(2).png" width="620" height="456">
+<img src="tray_launcher_at_work(3).png" width="620" height="456">
+
 ## Installation
 
 *tray-launcher* can be installed with `pip install tray-launcher`.
@@ -32,8 +36,3 @@ To run a script, select it in the **Start a Script** submenu from the context me
 4. In case of *tray launcher* crashing, scripts started via the *tray launcher* will NOT be terminated.
 
 5. There is an expected delay when executing "launcher run".
-
-## Screenshots
-<img src="tray_launcher_at_work.png" width="420" height="256">
-<img src="tray_launcher_at_work(2).png" width="420" height="256">
-<img src="tray_launcher_at_work(3).png" width="420" height="256">
