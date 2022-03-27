@@ -31,4 +31,4 @@ A log for the tray-launcher and associated *.bat* scripts will be saved under `%
 
 If *tray-launcher* crashes, scripts started with *tray-launcher* will **not** terminate.
 
-There is an expected delay when executing "launcher run".
+There is an expected delay when executing `launcher run`.
