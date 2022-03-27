@@ -8,14 +8,14 @@
 A launcher that resides in the Windows taskbar for managing .bat scripts.
 
 <img src="https://github.com/Jayich-Lab/tray-launcher/raw/td-readme/tray_launcher_at_work.png" width="620" height="410">
-<img src="https://github.com/Jayich-Lab/tray-launcher/raw/td-readme/tray_launcher_at_work(2).png" width="620" height="410">
-<img src="https://github.com/Jayich-Lab/tray-launcher/raw/td-readme/tray_launcher_at_work(3).png" width="620" height="410">
+<img src="https://github.com/Jayich-Lab/tray-launcher/raw/td-readme/tray_launcher_help_message.png" width="620" height="410">
+<img src="https://github.com/Jayich-Lab/tray-launcher/raw/td-readme/tray_launcher_contextmenu.png" width="620" height="410">
 
 ## Installation
 
 *tray-launcher* can be installed with `pip install tray-launcher`. 
 
-**Note**: *tray launcher* only works on Windows. 
+*tray launcher* only works on Windows. 
 
 ## Usage
 
