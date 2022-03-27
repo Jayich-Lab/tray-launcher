@@ -13,27 +13,25 @@ A launcher that resides in the Windows taskbar for managing .bat scripts.
 
 ## Usage
 
-To get started, `launcher run` and a small icon in the taskbar.
+*tray launcher* comes with a command-line interface. Use `launcher -h` to learn more.
 
-The *tray launcher* comes with a command-line interface. Use `launcher -h` to learn more.
+To get started, run `launcher run`, and a small icon will show on the taskbar.
 
-Before running any scripts from the tray launcher, they need to be loaded. This can be done by clicking the option **Load New Script(s)** in the context menu. Alternatively, paste scripts under `%USERPROFILE%\.tray_launcher\scripts`. Only *.bat* files are accepted.
+Before running any scripts from *tray launcher*, they need to be loaded. This can be done by clicking the option **Load New Script(s)** in the context menu. Alternatively, run `launcher load [full path to the script]`. Only *.bat* files are accepted.
 
-To run a script, select it in the **Start a Script** submenu from the context menu, or click "View All" to see all loaded scripts in a file dialogue. 
-
-Loggings of the *tray launcher* and the scripts you run will be saved under `%USERPROFILE%\.tray_launcher\logs`.
-
-*tray launcher* will list all scripts you started and are currently running. Move the cursor over to view more actions.
+To run a script, select it in the **Start a Script** submenu from the context menu, or click **View All** to see all loaded scripts from a file dialogue. Running `launcher start [script name]` will have the same effect.
 
 ## Notes
 
 1. *tray launcher* only works on Windows. 
 
-2. *tray launcher* listens to `127.0.0.1:7686`. If this port is not available, the command line interface will not work. You need to go to the control panel, create a new environment variable named `TRAY_LAUNCHER_PORT`, and set its value to a port number that is available on your device.
+2. *tray launcher* listens to port `127.0.0.1:7686`. If this port is not available, the command line interface will not work. To fix it, create a new environment variable named `TRAY_LAUNCHER_PORT` in the control panel and set its value to an available port number.
 
-3. If *tray launcher* crashes, scripts started via the *tray launcher* will NOT be terminated.
+3. Loggings of *tray launcher* and all scripts will be saved under `%USERPROFILE%\.tray_launcher\logs`.
 
-4. There will be an expected delay when executing "launcher run".
+4. In case of *tray launcher* crashing, scripts started via the *tray launcher* will NOT be terminated.
+
+5. There is an expected delay when executing "launcher run".
 
 ## Screenshot
 ![tray-launcher](tray_launcher_at_work.png)
