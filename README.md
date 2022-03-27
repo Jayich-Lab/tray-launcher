@@ -36,4 +36,4 @@ Loggings of the *tray launcher* and the scripts you run will be saved under `%US
 4. There will be an expected delay when executing "launcher run".
 
 ## Screenshot
-<img src="D:\tray_launcher_on_work.png" alt="Alt text">
+![tray-launcher](tray_launcher_at_work.png)
