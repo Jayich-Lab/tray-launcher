@@ -29,7 +29,7 @@ To run a script, select it in the **Start a Script** submenu from the context me
 
 *tray-launcher* listens to port `127.0.0.1:7686`. If this port is not available, create the environment variable `TRAY_LAUNCHER_PORT` and set its value to an available port number.
 
-A log for the tray-launcher and associated .bat scripts will be saved under `%USERPROFILE%\.tray_launcher\logs`.
+A log for the tray-launcher and associated *.bat* scripts will be saved under `%USERPROFILE%\.tray_launcher\logs`.
 
 In case of *tray-launcher* crashing, scripts started via *tray-launcher* will NOT be terminated.
 
