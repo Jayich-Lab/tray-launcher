@@ -15,22 +15,22 @@ A launcher that resides in the Windows taskbar for managing .bat scripts.
 
 Install *tray-launcher* with `pip install tray-launcher`.
 
-*tray launcher* only works on Windows. 
+*tray-launcher* only works on Windows. 
 
 ## Usage
 
-*tray launcher* comes with a command-line interface. Use `launcher -h` to learn more.
+*tray-launcher* comes with a command-line interface. Use `launcher -h` to learn more.
 
 To get started, run `launcher run`, and a small icon will show on the taskbar.
 
-Before running any scripts from *tray launcher*, they need to be loaded. This can be done by clicking the option **Load New Script(s)** in the context menu. Alternatively, run `launcher load [full path to the script]`. Only *.bat* files are accepted.
+Before running any scripts from *tray-launcher*, they need to be loaded. This can be done by clicking the option **Load New Script(s)** in the context menu. Alternatively, run `launcher load [full path to the script]`. Only *.bat* files are accepted.
 
 To run a script, select it in the **Start a Script** submenu from the context menu, or click **[View in Directory]** to see all loaded scripts from a file dialogue, or run `launcher start [script name]`.
 
-*tray launcher* listens to port `127.0.0.1:7686`. If this port is not available, create the environment variable `TRAY_LAUNCHER_PORT` and set its value to an available port number.
+*tray-launcher* listens to port `127.0.0.1:7686`. If this port is not available, create the environment variable `TRAY_LAUNCHER_PORT` and set its value to an available port number.
 
-A log for the tray launcher and associated .bat scripts will be saved under `%USERPROFILE%\.tray_launcher\logs`.
+A log for the tray-launcher and associated .bat scripts will be saved under `%USERPROFILE%\.tray_launcher\logs`.
 
-In case of *tray launcher* crashing, scripts started via *tray launcher* will NOT be terminated.
+In case of *tray-launcher* crashing, scripts started via *tray-launcher* will NOT be terminated.
 
 There is an expected delay when executing "launcher run".
