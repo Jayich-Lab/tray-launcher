@@ -5,7 +5,7 @@
 [![PyPI: tray-launcher](https://img.shields.io/pypi/v/tray-launcher)](https://pypi.org/project/tray-launcher/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-A launcher that resides in the Windows taskbar for managing .bat scripts.
+A launcher for Windows that resides in the taskbar for managing .bat scripts.
 
 <img src="https://github.com/Jayich-Lab/tray-launcher/raw/td-readme/tray_launcher_at_work.png" width="620" height="410">
 <img src="https://github.com/Jayich-Lab/tray-launcher/raw/td-readme/tray_launcher_help_message.png" width="620" height="410">
@@ -14,8 +14,6 @@ A launcher that resides in the Windows taskbar for managing .bat scripts.
 ## Installation
 
 Install *tray-launcher* with `pip install tray-launcher`.
-
-*tray-launcher* only works on Windows. 
 
 ## Usage
 
