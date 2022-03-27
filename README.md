@@ -13,7 +13,7 @@ A launcher that resides in the Windows taskbar for managing .bat scripts.
 
 ## Installation
 
-*tray-launcher* can be installed with `pip install tray-launcher`. 
+Install *tray-launcher* with `pip install tray-launcher`.
 
 *tray launcher* only works on Windows. 
 
