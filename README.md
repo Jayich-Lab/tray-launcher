@@ -33,5 +33,7 @@ To run a script, select it in the **Start a Script** submenu from the context me
 
 5. There is an expected delay when executing "launcher run".
 
-## Screenshot
+## Screenshots
 ![tray-launcher](tray_launcher_at_work.png)
+![tray-launcher](tray_launcher_at_work(2).png)
+![tray-launcher](tray_launcher_at_work(3).png)
