@@ -27,9 +27,9 @@ Before running any scripts from *tray launcher*, they need to be loaded. This ca
 
 To run a script, select it in the **Start a Script** submenu from the context menu, or click **[View in Directory]** to see all loaded scripts from a file dialogue, or run `launcher start [script name]`.
 
-*tray launcher* listens to port `127.0.0.1:7686`. If this port is not available, the command line interface will not work. To fix this, create a new environment variable named `TRAY_LAUNCHER_PORT` in the control panel and set its value to an available port number.
+*tray launcher* listens to port `127.0.0.1:7686`. If this port is not available, create the environment variable `TRAY_LAUNCHER_PORT` and set its value to an available port number.
 
-Loggings of *tray launcher* and all scripts will be saved under `%USERPROFILE%\.tray_launcher\logs`.
+A log for the tray launcher and associated .bat scripts will be saved under `%USERPROFILE%\.tray_launcher\logs`.
 
 In case of *tray launcher* crashing, scripts started via *tray launcher* will NOT be terminated.
 
