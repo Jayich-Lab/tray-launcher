@@ -7,9 +7,9 @@
 
 A launcher for Windows that resides in the taskbar for managing .bat scripts.
 
-<img src="https://github.com/Jayich-Lab/tray-launcher/raw/td-readme/tray_launcher_at_work.png" width="620" height="410">
-<img src="https://github.com/Jayich-Lab/tray-launcher/raw/td-readme/tray_launcher_help_message.png" width="620" height="410">
-<img src="https://github.com/Jayich-Lab/tray-launcher/raw/td-readme/tray_launcher_contextmenu.png" width="620" height="410">
+<img src="https://github.com/Jayich-Lab/tray-launcher/raw/main/tray_launcher_at_work.png" width="620" height="410">
+<img src="https://github.com/Jayich-Lab/tray-launcher/raw/main/tray_launcher_help_message.png" width="620" height="410">
+<img src="https://github.com/Jayich-Lab/tray-launcher/raw/main/tray_launcher_contextmenu.png" width="620" height="410">
 
 ## Installation
 
