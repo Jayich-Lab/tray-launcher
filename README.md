@@ -25,7 +25,7 @@ To get started, run `launcher run`, and a small icon will show on the taskbar.
 
 Before running any scripts from *tray launcher*, they need to be loaded. This can be done by clicking the option **Load New Script(s)** in the context menu. Alternatively, run `launcher load [full path to the script]`. Only *.bat* files are accepted.
 
-To run a script, select it in the **Start a Script** submenu from the context menu, or click **View All** to see all loaded scripts from a file dialogue, or run `launcher start [script name]`.
+To run a script, select it in the **Start a Script** submenu from the context menu, or click **[View in Directory]** to see all loaded scripts from a file dialogue, or run `launcher start [script name]`.
 
 *tray launcher* listens to port `127.0.0.1:7686`. If this port is not available, the command line interface will not work. To fix this, create a new environment variable named `TRAY_LAUNCHER_PORT` in the control panel and set its value to an available port number.
 
