@@ -5,32 +5,30 @@
 [![PyPI: tray-launcher](https://img.shields.io/pypi/v/tray-launcher)](https://pypi.org/project/tray-launcher/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-A launcher that resides in the Windows task bar for managing .bat scripts.
+A launcher for Windows that resides in the taskbar for managing .bat scripts.
+
+<img src="https://github.com/Jayich-Lab/tray-launcher/raw/main/tray_launcher_at_work.png" width="620" height="410">
+<img src="https://github.com/Jayich-Lab/tray-launcher/raw/main/tray_launcher_help_message.png" width="620" height="410">
+<img src="https://github.com/Jayich-Lab/tray-launcher/raw/main/tray_launcher_contextmenu.png" width="620" height="410">
 
 ## Installation
 
-*tray-launcher* can be installed with `pip install -i https://test.pypi.org/simple/ tray-launcher`.
+Install *tray-launcher* with `pip install tray-launcher`.
 
 ## Usage
 
-To start the *tray launcher*, first make sure you are in the Python environment variable where *tray-launcher* is installed. Then, running `launcher run` will show a small icon in the taskbar.
+*tray-launcher* comes with a command-line interface. Use `launcher -h` to learn more.
 
-The *tray launcher* comes with a command line interface. Use `launcher -h` to learn more.
+To get started, run `launcher run`, and a small icon will show on the taskbar.
 
-Before running any scripts from the tray launcher, they need to be loaded. This can be done by clicking the option **Load New Script(s)** in the contextmenu. Alternatively, paste scripts under `%USERPROFILE%\.tray_launcher\scripts`. Only *.bat* files are accepted.
+Before running any scripts from *tray-launcher*, they need to be loaded. This can be done by clicking the option **Load New Script(s)** in the context menu. Alternatively, run `launcher load [full path to the script]`. Only *.bat* files are accepted.
 
-To run a script, select it in the **Start a Script** submenu from the contextmenu, or click "View All" to see all loaded scripts in a file dialogue. 
+To run a script, select it in the **Start a Script** submenu from the context menu, or click **[View in Directory]** to see all loaded scripts from a file dialogue, or run `launcher start [script name]`.
 
-Loggings of the *tray launcher* and the scripts you run will be saved under `%USERPROFILE%\.tray_launcher\logs`.
+*tray-launcher* listens to port `127.0.0.1:7686`. If this port is not available, create the environment variable `TRAY_LAUNCHER_PORT` and set its value to an available port number.
 
-The *tray launcher* will list all scripts you started and are currently running. Move the cursor over to view more actions.
+A log for the tray-launcher and associated *.bat* scripts will be saved under `%USERPROFILE%\.tray_launcher\logs`.
 
-## Notes
+If *tray-launcher* crashes, scripts started with *tray-launcher* will **not** terminate.
 
-1. The *tray launcher* only works on Windows. 
-
-2. The *tray launcher* listens to `127.0.0.1:7686`. If this port is not available, the command line interface will not work. You need to go to control panel, create a new environment variable named `TRAY_LAUNCHER_PORT` and set its value to a port number that is available on your device.
-
-3. If the *tray launcher* crashes, scripts started via the *tray launcher* will NOT be terminated.
-
-4. There will be an expected delay when you run "launcher run".
+There is an expected delay when executing `launcher run`.

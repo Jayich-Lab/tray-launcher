@@ -16,7 +16,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up Python and nox
-      uses: excitedleigh/setup-nox@v2
+      uses: gschaffner/setup-nox@f9b95bd3efbc64c391244db1af9640e14fc3bf72
 
     - name: Lint
       run: |
