@@ -286,9 +286,9 @@ class TrayLauncherGUI(QMainWindow):
         )
         self.view_all.addAction(self.view_in_directory)
 
-    def prepare_context_menu(self):
-        """Checks if scripts are still running; if not, remove them from the menu.
-        Also rebuilds the the view_all menu
+    def check_active_processes(self):
+        """Checks if scripts are still running; if not, remove them from the menu
+                and from the currently_running_scripts array.
         """
         to_del = []
         for (
@@ -318,6 +318,8 @@ class TrayLauncherGUI(QMainWindow):
         for ts in to_del:
             del self.script_manager.running_child_scripts[ts]
 
+    def prepare_context_menu(self):
+        self.check_active_processes()
         self.check_available_scripts()
 
     def load_scripts_from_file_dialogue(self, dir):
@@ -434,7 +436,10 @@ class TrayLauncherGUI(QMainWindow):
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.Yes,
         )
+
         if replace_reply == QMessageBox.Yes:
+            self.check_active_processes()
+            
             for tuple in self.currently_running_scripts.values():
                 self.script_manager.terminate(tuple[0])
             logging.info("Tray Launcher Exited.")

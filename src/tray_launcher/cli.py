@@ -73,6 +73,8 @@ class TrayLauncherCLI(QObject):
 
     def start(self, data):
         """Process the "start" command. Start new scripts."""
+        self.gui.check_active_processes()
+
         for path_str in data[1:]:
             file_path = self.gui.to_loaded_path(Path(path_str))
             if file_path is not None:
@@ -91,6 +93,7 @@ class TrayLauncherCLI(QObject):
             else:
                 self.message_to_client.append("{} is not valid.".format(path_str))
 
+    ### Need to check if the script is still active or not
     def terminate(self, data):
         """Process the "terminate" command. Terminate scripts that are running."""
         for path_str in data[1:]:
@@ -98,10 +101,12 @@ class TrayLauncherCLI(QObject):
 
     def list_all(self, data):
         """Processes the "list -a" command. Writes loaded scripts' stems to the string
-        which will be written back to the client.
+                and re-populate the gui view_all menu.
         """
         self.gui.available_scripts.clear()
         self.gui.view_all.clear()
+
+        self.gui.check_active_processes()
 
         for file_path in Path.iterdir(self.gui.AVAILABLE_SCRIPTS):
             if file_path.is_file() and file_path.suffix == ".bat":
@@ -128,6 +133,8 @@ class TrayLauncherCLI(QObject):
         """Processes the "list -r" command. Writes currently running scripts' stems to the string
         which will be written back to the client.
         """
+        self.gui.check_active_processes()
+        
         for st in self.gui.currently_running_scripts:
             self.message_to_client.append("{}".format(st))
 
@@ -163,6 +170,8 @@ class TrayLauncherCLI(QObject):
 
     def quit(self, data):
         """Processes the "quit" command. Quits the tray launcher without prompting."""
+        self.gui.check_active_processes()
+        
         for tuple in self.gui.currently_running_scripts.values():
             self.gui.script_manager.terminate(tuple[0])
         logging.info("Tray Launcher Exited.")
@@ -174,6 +183,8 @@ class TrayLauncherCLI(QObject):
         self.message_to_client.append("{} is an invalid command.".format(data[0]))
 
     def _on_running_script(self, func, path_str, success_message):
+        self.gui.check_active_processes()
+
         file_path = self.gui.to_loaded_path(Path(path_str))
         if file_path is not None:
             if (
