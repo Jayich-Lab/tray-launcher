@@ -467,8 +467,6 @@ class TrayLauncherGUI(QMainWindow):
         if replace_reply == QMessageBox.Yes:
             self.check_active_processes()
             
-            for tuple in self.currently_running_scripts.values():
-                self.script_manager.terminate(tuple[0])
             logging.info("Tray Launcher Exited.")
             self.script_manager.deleteLater()
             qApp.quit()

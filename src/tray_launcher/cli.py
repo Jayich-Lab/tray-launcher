@@ -172,8 +172,6 @@ class TrayLauncherCLI(QObject):
         """Processes the "quit" command. Quits the tray launcher without prompting."""
         self.gui.check_active_processes()
         
-        for tuple in self.gui.currently_running_scripts.values():
-            self.gui.script_manager.terminate(tuple[0])
         logging.info("Tray Launcher Exited.")
         self.gui.script_manager.deleteLater()
         qApp.quit()
