@@ -44,7 +44,7 @@ class ChildScript:
         )
 
         try:
-            self.outputs_file = open(self.log_path, "a")
+            self.outputs_file = open(self.log_path, "a+")
         except Exception as err:
             logging.error(err + ": Failed to open/create a file for ChildScript outputs.")
             raise

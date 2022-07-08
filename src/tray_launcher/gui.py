@@ -33,6 +33,7 @@ class TrayLauncherGUI(QMainWindow):
 
         self.LOGS = user_home / "logs"
         self.AVAILABLE_SCRIPTS = user_home / "scripts"
+        self.TRACK = user_home / "track"
 
         self.icon = str(home_path / "icons" / "tray_icon.png")
         self.check_mark = str(home_path / "icons" / "check_mark.png")
@@ -61,18 +62,25 @@ class TrayLauncherGUI(QMainWindow):
         except Exception as err:
             logging.error(err + ": Failed to create new directory for available scripts")
             raise
+        
+        try:
+            self.TRACK.mkdir(parents=True, exist_ok=True)
+        except Exception as err:
+            logging.error(err + ": Failed to create new directory to track processes started")
+            raise
+        self.track_file = self.TRACK / "running_processes.log"
 
         logging.info("Tray Launcher Started.")
 
-        self.script_count = 0
+        # key: script.stem
+        # value: QAction
+        self.available_scripts = {}
 
         # key: string:                          script.stem
         # value: tuple (int, QMenu):            (timestamp, three_menu)
         self.currently_running_scripts = {}
 
-        # key: script.stem
-        # value: QAction
-        self.available_scripts = {}
+        self.script_count = 0
 
         self.init_ui()
 
@@ -187,6 +195,8 @@ class TrayLauncherGUI(QMainWindow):
         three_menu.menuAction().setIcon(QIcon(self.check_mark))
         self.available_scripts[script_path.stem].setEnabled(False)
 
+        self.check_active_processes()
+
     def show_script(self, args):
         """Bring windows associated with a script to the foreground, if any.
 
@@ -224,6 +234,8 @@ class TrayLauncherGUI(QMainWindow):
             if (args[0][0]).stem in self.available_scripts:
                 self.available_scripts[(args[0][0]).stem].setIcon(QIcon())
                 self.available_scripts[(args[0][0]).stem].setEnabled(True)
+            
+            self.check_active_processes()
 
             logging.info("{} was terminated through Tray Launcher.".format(args[0][0].stem))
 
@@ -236,7 +248,7 @@ class TrayLauncherGUI(QMainWindow):
         """
         self.terminate_script(args)
         self.start_new_script(args[0][0])
-
+        
         logging.info("{} was restarted.".format(args[0][0].stem))
 
     def run_in_manager(self, args, func):
@@ -277,7 +289,7 @@ class TrayLauncherGUI(QMainWindow):
                     file_path.unlink()
 
     def check_available_scripts(self):
-        """Reloads .bat files in the \\scripts directory to the view_all menu"""
+        """Reloads .bat files in the \\scripts directory to the view_all menu."""
         self.add_available_scripts(self.view_all)
 
         self.view_in_directory = QAction("[View in Directory]", self)
@@ -285,6 +297,12 @@ class TrayLauncherGUI(QMainWindow):
             partial(self.open_script_from_file_dialogue, self.AVAILABLE_SCRIPTS)
         )
         self.view_all.addAction(self.view_in_directory)
+
+    def update_track(self):
+        '''Write the timestamp and pid of active processes into the track file.'''
+        with open(self.track_file, "w") as f:
+            for timestamp, childscript in self.script_manager.running_child_scripts.items:
+                f.writelines(str(childscript.pid) + " " + str(timestamp))
 
     def check_active_processes(self):
         """Checks if scripts are still running; if not, remove them from the menu
@@ -317,6 +335,8 @@ class TrayLauncherGUI(QMainWindow):
 
         for ts in to_del:
             del self.script_manager.running_child_scripts[ts]
+
+        self.update_track()
 
     def prepare_context_menu(self):
         self.check_active_processes()
@@ -427,8 +447,15 @@ class TrayLauncherGUI(QMainWindow):
         self.showMinimized()
         self.showMaximized()
         self.resize(0, 0)
+
         b = QMessageBox()
         b.setWindowFlag(Qt.WindowStaysOnTopHint)
+
+        refRectangle = b.frameGeometry()
+        center = QDesktopWidget().availableGeometry().center()
+        refRectangle.moveCenter(center)
+        b.move(refRectangle.topLeft)
+
         replace_reply = b.question(
             self,
             "Quit Tray Launcher",
