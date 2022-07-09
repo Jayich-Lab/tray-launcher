@@ -303,6 +303,7 @@ class TrayLauncherGUI(QMainWindow):
         with open(self.track_file, "w") as f:
             for timestamp, childscript in self.script_manager.running_child_scripts.items:
                 f.writelines(str(childscript.pid) + " " + str(timestamp))
+        pass
 
     def check_active_processes(self):
         """Checks if scripts are still running; if not, remove them from the menu
@@ -451,10 +452,10 @@ class TrayLauncherGUI(QMainWindow):
         b = QMessageBox()
         b.setWindowFlag(Qt.WindowStaysOnTopHint)
 
-        refRectangle = b.frameGeometry()
-        center = QDesktopWidget().availableGeometry().center()
-        refRectangle.moveCenter(center)
-        b.move(refRectangle.topLeft)
+        # refRectangle = self.frameGeometry()
+        # center = QDesktopWidget().availableGeometry().center()
+        # refRectangle.moveCenter(center)
+        # self.move(refRectangle.topLeft)
 
         replace_reply = b.question(
             self,
