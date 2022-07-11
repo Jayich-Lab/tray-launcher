@@ -300,9 +300,9 @@ class TrayLauncherGUI(QMainWindow):
 
     def update_track(self):
         '''Write the timestamp and pid of active processes into the track file.'''
-        with open(self.track_file, "w") as f:
-            for timestamp, childscript in self.script_manager.running_child_scripts.items:
-                f.writelines(str(childscript.pid) + " " + str(timestamp))
+        # with open(self.track_file, "w") as f:
+        #     for timestamp, childscript in self.script_manager.running_child_scripts.items:
+        #         f.writelines(str(childscript.pid) + " " + str(timestamp))
         pass
 
     def check_active_processes(self):
@@ -338,6 +338,8 @@ class TrayLauncherGUI(QMainWindow):
             del self.script_manager.running_child_scripts[ts]
 
         self.update_track()
+
+        logging.info("Checked processes activity.")
 
     def prepare_context_menu(self):
         self.check_active_processes()
@@ -452,13 +454,13 @@ class TrayLauncherGUI(QMainWindow):
         b = QMessageBox()
         b.setWindowFlag(Qt.WindowStaysOnTopHint)
 
-        # refRectangle = self.frameGeometry()
-        # center = QDesktopWidget().availableGeometry().center()
-        # refRectangle.moveCenter(center)
-        # self.move(refRectangle.topLeft)
+        refRectangle = b.frameGeometry()
+        center = QDesktopWidget().availableGeometry().center()
+        refRectangle.moveCenter(center)
+        b.move(refRectangle.topLeft())
 
         replace_reply = b.question(
-            self,
+            b,
             "Quit Tray Launcher",
             "Do you want to quit tray launcher?",
             QMessageBox.Yes | QMessageBox.No,
