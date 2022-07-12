@@ -56,7 +56,7 @@ class ChildScript:
             try:
                 self.outputs_file = open(self.log_path, "a+")
             except Exception as err:
-                logging.error(err + ": Failed to open/create a file for ChildScript outputs.")
+                logging.error(err + ": Failed to open a file for ChildScript outputs.")
                 raise
             
 
@@ -138,7 +138,7 @@ class ChildScript:
         """Checks if there is any subprocess still running."""
         self.update_current_PIDs()
 
-        if self.child_script.poll() is None:
+        if(self.child_script is not None and self.child_script.poll() is None):
             return True
         elif self.current_PIDs:
             return True

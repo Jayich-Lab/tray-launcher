@@ -41,7 +41,7 @@ class TrayLauncherGUI(QMainWindow):
         self.check_mark = str(home_path / "icons" / "check_mark.png")
 
         # key: string:                          script.stem
-        # value: tuple (int, QMenu):            (timestamp, three_menu)
+        # value: tuple (float, QMenu):            (timestamp, three_menu)
         self.currently_running_scripts = {}
         self.script_count = 0
 
@@ -90,7 +90,7 @@ class TrayLauncherGUI(QMainWindow):
             for line in f.read().split("\n"):
                 #[0]: pid, [1]: create_time, [2]: stem
                 process_info = line.split(" ")
-                if(process_info != " "):
+                if(process_info[0]):
                     info = (int(process_info[0]), float(process_info[1]), process_info[2])
 
                     if(_ps.pid_exists(info[0])):
@@ -364,7 +364,6 @@ class TrayLauncherGUI(QMainWindow):
         ) in self.script_manager.running_child_scripts.items():
             if not child_script_obj.is_active():
                 child_script_obj.outputs_file.close()
-
                 to_del.append(timestamp)
                 self.context_menu.removeAction(
                     self.currently_running_scripts[child_script_obj.script_path.stem][
@@ -372,7 +371,6 @@ class TrayLauncherGUI(QMainWindow):
                     ].menuAction()
                 )
                 del self.currently_running_scripts[child_script_obj.script_path.stem]
-
                 self.script_count -= 1
                 if self.script_count == 0:
                     self.none_currently_running.setVisible(True)
@@ -381,13 +379,10 @@ class TrayLauncherGUI(QMainWindow):
                         child_script_obj.script_path_str
                     )
                 )
-
         for ts in to_del:
             del self.script_manager.running_child_scripts[ts]
 
         self.update_track()
-
-        # logging.info("Checked processes activity.")
 
     def prepare_context_menu(self):
         self.check_active_processes()
