@@ -101,7 +101,7 @@ class TrayLauncherCLI(QObject):
 
     def list_all(self, data):
         """Processes the "list -a" command. Writes loaded scripts' stems to the string
-                and re-populate the gui view_all menu.
+        and re-populate the gui view_all menu.
         """
         self.gui.available_scripts.clear()
         self.gui.view_all.clear()
@@ -134,7 +134,7 @@ class TrayLauncherCLI(QObject):
         which will be written back to the client.
         """
         self.gui.check_active_processes()
-        
+
         for st in self.gui.currently_running_scripts:
             self.message_to_client.append("{}".format(st))
 
@@ -171,7 +171,7 @@ class TrayLauncherCLI(QObject):
     def quit(self, data):
         """Processes the "quit" command. Quits the tray launcher without prompting."""
         self.gui.check_active_processes()
-        
+
         logging.info("Tray Launcher Exited.")
         self.gui.script_manager.deleteLater()
         qApp.quit()

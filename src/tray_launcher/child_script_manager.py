@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PyQt5.QtCore import QObject
 from win32con import (
     HWND_NOTOPMOST,
@@ -11,8 +13,6 @@ from win32gui import EnumWindows, IsWindowEnabled, IsWindowVisible, SetWindowPos
 from win32process import GetWindowThreadProcessId
 
 from tray_launcher import child_script
-
-from pathlib import Path
 
 
 class ChildScriptManager(QObject):
@@ -30,7 +30,7 @@ class ChildScriptManager(QObject):
             args: (Path, str), the path to the script;
                             the path to the log file for the TRAY LAUNCHER, not this process.
         """
-        c = child_script.ChildScript(-1, -1., Path(args[0]), args[1])
+        c = child_script.ChildScript(-1, -1.0, Path(args[0]), args[1])
         c.start_script()
         self.running_child_scripts[c.create_time] = c
 
