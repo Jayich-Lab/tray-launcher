@@ -35,46 +35,21 @@ class ChildScript:
         self.create_time = create_time
 
         if self.create_time != -1:
-            t = _t.localtime(self.create_time)
-            log_file = self.get_log_path()
+            self.access_file(_t.localtime(self.create_time))
 
-            try:
-                log_directory = log_file / (
-                    str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2)
-                )
-
-                log_directory.mkdir(parents=True, exist_ok=True)
-            except Exception as err:
-                logging.error(err + ": Failed to create new directory for ChildScript outputs.")
-                raise
-
-            self.log_path = log_directory / "{}-{}_{}_{}.log".format(
-                self.script_path.stem,
-                str(t.tm_hour).zfill(2),
-                str(t.tm_min).zfill(2),
-                str(t.tm_sec).zfill(2),
-            )
-
-            try:
-                self.outputs_file = open(self.log_path, "a+")
-            except Exception as err:
-                logging.error(err + ": Failed to open a file for ChildScript outputs.")
-                raise
-
-    def start_script(self):
-        t = _t.localtime(_t.time())
+    def access_file(self, t):
         log_file = self.get_log_path()
 
         try:
             log_directory = log_file / (
                 str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2)
             )
+
             log_directory.mkdir(parents=True, exist_ok=True)
         except Exception as err:
             logging.error(err + ": Failed to create new directory for ChildScript outputs.")
             raise
 
-        t = _t.localtime(_t.time())
         self.log_path = log_directory / "{}-{}_{}_{}.log".format(
             self.script_path.stem,
             str(t.tm_hour).zfill(2),
@@ -85,8 +60,11 @@ class ChildScript:
         try:
             self.outputs_file = open(self.log_path, "a+")
         except Exception as err:
-            logging.error(err + ": Failed to open/create a file for ChildScript outputs.")
+            logging.error(err + ": Failed to open a file for ChildScript outputs.")
             raise
+
+    def start_script(self):
+        self.access_file(_t.localtime(_t.time()))
 
         self.child_script = subprocess.Popen(
             '"' + self.script_path_str + '"',
