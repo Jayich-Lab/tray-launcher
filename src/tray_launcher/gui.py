@@ -2,7 +2,6 @@ import logging
 import os
 import shutil as _su
 import time as _t
-from concurrent.futures import process
 from functools import partial
 from pathlib import Path
 
@@ -54,7 +53,6 @@ class TrayLauncherGUI(QMainWindow):
             )
             self._log_directory.mkdir(parents=True, exist_ok=True)
         except Exception:
-            # print(err + ": Failed to create new directory for outputs")
             raise
 
         self.tray_launcher_log = self._log_directory / "tray_launcher.log"
@@ -85,6 +83,11 @@ class TrayLauncherGUI(QMainWindow):
 
         self.init_ui()
 
+        self.check_leftover()
+
+        self.update_track()
+
+    def check_leftover(self):
         try:
             f = open(self.track_file, "r")
             for line in f.read().split("\n"):
@@ -100,10 +103,6 @@ class TrayLauncherGUI(QMainWindow):
         except Exception as e:
             logging.error(e)
 
-        self.update_track()
-
-    # TO-DO:
-    # buttons, fill array, see "start_new_script()"
     def insert_leftover(self, info):  # [0]: pid, [1]: create_time, [2]: stem
         # Use the stem to recover the script_path
         script_path = self.to_loaded_path(info[2])

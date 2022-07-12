@@ -93,7 +93,6 @@ class TrayLauncherCLI(QObject):
             else:
                 self.message_to_client.append("{} is not valid.".format(path_str))
 
-    ### Need to check if the script is still active or not
     def terminate(self, data):
         """Process the "terminate" command. Terminate scripts that are running."""
         for path_str in data[1:]:
