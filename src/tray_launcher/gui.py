@@ -118,7 +118,7 @@ class TrayLauncherGUI(QMainWindow):
 
         self.none_currently_running.setVisible(False)
         self.script_count += 1
-
+        
         logging.info("{} is retrieved.".format(info[2]))
     
         self.currently_running_scripts[info[2]] = (info[1], three_menu)
