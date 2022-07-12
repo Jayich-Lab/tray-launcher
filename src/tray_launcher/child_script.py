@@ -3,18 +3,21 @@ import os
 import signal
 import subprocess
 import time as _t
+import psutil as _ps
 from pathlib import Path
 
 
 class ChildScript:
     ENCODING = "utf-8"
-
-    def __init__(self, script_path_str, logging_log):
-        self.script_path_str = script_path_str
-        self.script_path = Path(self.script_path_str)
-        self.child_script = None
-        self.child_script_PID = -1
-        self.current_PIDs = []
+    def __init__(self, pid, create_time, script_path, logging_log):
+        '''Create a ChildScript instance, used in reattaching processes when the tray launcher restarts.
+        
+        Args:
+            pid: int
+            create_time: float
+            script_path: Path
+            logging_log: Path
+        '''
 
         logging.basicConfig(
             filename=logging_log,
@@ -22,9 +25,47 @@ class ChildScript:
             format="%(asctime)s %(message)s",
         )
 
+        self.script_path_str = str(script_path)
+        self.script_path = script_path
+        self.child_script = None
+        self.child_script_PID = pid
+        self.current_PIDs = []
+        self.create_time = create_time
+
+        if(self.create_time != -1):
+            t = _t.localtime(self.create_time)
+            log_file = self.get_log_path()
+
+            try:
+                log_directory = log_file / (
+                    str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2)
+                )
+                
+                log_directory.mkdir(parents=True, exist_ok=True)
+            except Exception as err:
+                logging.error(err + ": Failed to create new directory for ChildScript outputs.")
+                raise
+            
+            self.log_path = log_directory / "{}-{}_{}_{}.log".format(
+                self.script_path.stem,
+                str(t.tm_hour).zfill(2),
+                str(t.tm_min).zfill(2),
+                str(t.tm_sec).zfill(2),
+            )
+            
+            try:
+                self.outputs_file = open(self.log_path, "a+")
+            except Exception as err:
+                logging.error(err + ": Failed to open/create a file for ChildScript outputs.")
+                raise
+            
+
+
+        
+
+
     def start_script(self):
         t = _t.localtime(_t.time())
-
         log_file = self.get_log_path()
 
         try:
@@ -35,7 +76,8 @@ class ChildScript:
         except Exception as err:
             logging.error(err + ": Failed to create new directory for ChildScript outputs.")
             raise
-
+        
+        t = _t.localtime(_t.time())
         self.log_path = log_directory / "{}-{}_{}_{}.log".format(
             self.script_path.stem,
             str(t.tm_hour).zfill(2),
@@ -48,7 +90,7 @@ class ChildScript:
         except Exception as err:
             logging.error(err + ": Failed to open/create a file for ChildScript outputs.")
             raise
-
+        
         self.child_script = subprocess.Popen(
             '"' + self.script_path_str + '"',
             encoding=self.ENCODING,
@@ -58,6 +100,11 @@ class ChildScript:
         )
 
         self.child_script_PID = self.child_script.pid
+
+        p = _ps.Process(self.child_script_PID)
+        self.create_time = p.create_time()
+
+
 
     def terminate_script(self):
         self.update_current_PIDs()

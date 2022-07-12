@@ -12,12 +12,14 @@ from win32process import GetWindowThreadProcessId
 
 from tray_launcher import child_script
 
+from pathlib import Path
+
 
 class ChildScriptManager(QObject):
     def __init__(self):
         super().__init__()
 
-        # key: timestamp
+        # key: float, create_time
         # value: ChildScript
         self.running_child_scripts = {}
 
@@ -25,13 +27,12 @@ class ChildScriptManager(QObject):
         """Starts a new script.
 
         Args:
-            args: ((Path, int), str), the path to the script,
-                the timestamp of the ChildScript.
-                Plus the path to the log file for the tray launcher.
+            args: (Path, str), the path to the script;
+                            the path to the log file for the TRAY LAUNCHER, not this process.
         """
-        c = child_script.ChildScript(str(args[0][0]), args[1])
+        c = child_script.ChildScript(-1, -1., Path(args[0]), args[1])
         c.start_script()
-        self.running_child_scripts[args[0][1]] = c
+        self.running_child_scripts[c.create_time] = c
 
     def show(self, args):
         """Brings windows associated with a script to the foreground.

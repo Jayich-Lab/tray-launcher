@@ -1,7 +1,9 @@
+from concurrent.futures import process
 import logging
 import os
 import shutil as _su
 import time as _t
+import psutil as _ps
 from functools import partial
 from pathlib import Path
 
@@ -37,6 +39,11 @@ class TrayLauncherGUI(QMainWindow):
 
         self.icon = str(home_path / "icons" / "tray_icon.png")
         self.check_mark = str(home_path / "icons" / "check_mark.png")
+
+        # key: string:                          script.stem
+        # value: tuple (int, QMenu):            (timestamp, three_menu)
+        self.currently_running_scripts = {}
+        self.script_count = 0
 
         super().__init__()
         self.script_manager = child_script_manager.ChildScriptManager()
@@ -76,13 +83,47 @@ class TrayLauncherGUI(QMainWindow):
         # value: QAction
         self.available_scripts = {}
 
-        # key: string:                          script.stem
-        # value: tuple (int, QMenu):            (timestamp, three_menu)
-        self.currently_running_scripts = {}
-
-        self.script_count = 0
-
         self.init_ui()
+
+        try:
+            f = open(self.track_file, "r")
+            for line in f.read().split("\n"):
+                #[0]: pid, [1]: create_time, [2]: stem
+                process_info = line.split(" ")
+                if(process_info != " "):
+                    info = (int(process_info[0]), float(process_info[1]), process_info[2])
+
+                    if(_ps.pid_exists(info[0])):
+                        p = _ps.Process(info[0])
+                        if(float(p.create_time()) == info[1]):
+                            self.insert_leftover(info)
+        except Exception as e:
+            logging.error(e)
+
+        self.update_track()
+
+
+    # TO-DO:
+    # buttons, fill array, see "start_new_script()"
+    def insert_leftover(self, info): # [0]: pid, [1]: create_time, [2]: stem
+        # Use the stem to recover the script_path
+        script_path = self.to_loaded_path(info[2])
+
+        self.script_manager.running_child_scripts[info[1]] = child_script.ChildScript(info[0], info[1], 
+            script_path, self.tray_launcher_log)
+
+        three_menu = self.create_process_menu(script_path, info[1])
+        
+        self.context_menu.insertMenu(self.bottom_separator, three_menu)
+
+        self.none_currently_running.setVisible(False)
+        self.script_count += 1
+
+        logging.info("{} is retrieved.".format(info[2]))
+    
+        self.currently_running_scripts[info[2]] = (info[1], three_menu)
+
+        self.available_scripts[info[2]].setEnabled(False)
 
     def init_ui(self):
         self.trayicon = QSystemTrayIcon(self)
@@ -145,18 +186,7 @@ class TrayLauncherGUI(QMainWindow):
             return None
         return loaded_path
 
-    def start_new_script(self, script_path):
-        """Starts a new script.
-
-        Args:
-            script_path: Path, path to the script to be started.
-        """
-        self.prepare_context_menu()
-
-        if script_path.stem in self.currently_running_scripts:
-            return
-
-        timestamp = _t.time()
+    def create_process_menu(self, script_path, timestamp):
         args = (script_path, timestamp)
         three_menu = QMenu(script_path.stem, self)
 
@@ -172,13 +202,6 @@ class TrayLauncherGUI(QMainWindow):
         terminateAction.triggered.connect(partial(self.terminate_script, (args, three_menu)))
         three_menu.addAction(terminateAction)
 
-        self.run_in_manager(args, self.script_manager.run_new)
-
-        self.none_currently_running.setVisible(False)
-        self.script_count += 1
-
-        logging.info("{} was started.".format(script_path.stem))
-
         logAction = QAction("Log", self)
         logAction.triggered.connect(
             partial(
@@ -188,11 +211,34 @@ class TrayLauncherGUI(QMainWindow):
         )
         three_menu.insertAction(restartAction, logAction)
 
+        three_menu.menuAction().setIcon(QIcon(self.check_mark))
+
+        return three_menu
+
+    def start_new_script(self, script_path):
+        """Starts a new script.
+
+        Args:
+            script_path: Path, path to the script to be started.
+        """
+        self.prepare_context_menu()
+
+        if script_path.stem in self.currently_running_scripts:
+            return
+
+        self.run_in_manager(script_path, self.script_manager.run_new)
+        timestamp = max(key for key in self.script_manager.running_child_scripts) # !
+        
+        three_menu = self.create_process_menu(script_path, timestamp)
         self.context_menu.insertMenu(self.bottom_separator, three_menu)
+
+        self.none_currently_running.setVisible(False)
+        self.script_count += 1
+
+        logging.info("{} is started.".format(script_path.stem))
 
         self.currently_running_scripts[script_path.stem] = (timestamp, three_menu)
 
-        three_menu.menuAction().setIcon(QIcon(self.check_mark))
         self.available_scripts[script_path.stem].setEnabled(False)
 
         self.check_active_processes()
@@ -300,10 +346,12 @@ class TrayLauncherGUI(QMainWindow):
 
     def update_track(self):
         '''Write the timestamp and pid of active processes into the track file.'''
-        # with open(self.track_file, "w") as f:
-        #     for timestamp, childscript in self.script_manager.running_child_scripts.items:
-        #         f.writelines(str(childscript.pid) + " " + str(timestamp))
-        pass
+        try:
+            f = open(self.track_file, "w")
+            for childscript in self.script_manager.running_child_scripts.values():
+                f.write(str(childscript.child_script_PID) + " " + str(childscript.create_time) + " " + str(childscript.script_path.stem) + "\n")
+        except Exception as e:
+            logging.error(e)
 
     def check_active_processes(self):
         """Checks if scripts are still running; if not, remove them from the menu
@@ -339,7 +387,7 @@ class TrayLauncherGUI(QMainWindow):
 
         self.update_track()
 
-        logging.info("Checked processes activity.")
+        # logging.info("Checked processes activity.")
 
     def prepare_context_menu(self):
         self.check_active_processes()
