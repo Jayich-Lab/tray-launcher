@@ -73,6 +73,7 @@ class TrayLauncherGUI(QMainWindow):
         except Exception as err:
             logging.error(err + ": Failed to create new directory to track processes started")
             raise
+        # This file contains information (pid, creation_time, name) of each active processes started by the tray launcher.
         self.track_file = self.TRACK / "running_processes.log"
 
         logging.info("Tray Launcher Started.")
@@ -88,6 +89,9 @@ class TrayLauncherGUI(QMainWindow):
         self.update_track()
 
     def check_leftover(self):
+        """Check if processes recorded in the track file are still running, if so, reattach them.
+        Check both the pid and the creation of each processes recorded.
+        """
         try:
             f = open(self.track_file, "r")
             for line in f.read().split("\n"):
@@ -103,8 +107,11 @@ class TrayLauncherGUI(QMainWindow):
         except Exception as e:
             logging.error(e)
 
-    def insert_leftover(self, info):  # [0]: pid, [1]: create_time, [2]: stem
-        # Use the stem to recover the script_path
+    def insert_leftover(self, info):
+        """Reattach processes from last time.
+        Args:
+            info: an array which has [0]: pid, [1]: create_time, [2]: stem
+        """
         script_path = self.to_loaded_path(info[2])
 
         self.script_manager.running_child_scripts[info[1]] = child_script.ChildScript(

@@ -38,6 +38,7 @@ class ChildScript:
             self.access_file(_t.localtime(self.create_time))
 
     def access_file(self, t):
+        """Use the creation time of the process to open its log file."""
         log_file = self.get_log_path()
 
         try:
@@ -118,6 +119,7 @@ class ChildScript:
         return False
 
     def update_current_PIDs(self):
+        """Populate the self.current_PIDs array with pids of child processes."""
         self.current_PIDs = []
         wmic_ = subprocess.run(
             "wmic process where (ParentProcessId={}) get ProcessId".format(
