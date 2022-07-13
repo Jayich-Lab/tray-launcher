@@ -73,7 +73,7 @@ class TrayLauncherGUI(QMainWindow):
         except Exception as err:
             logging.error(err + ": Failed to create new directory to track processes started")
             raise
-        # This file contains information (pid, creation_time, name) 
+        # This file contains information (pid, creation_time, name)
         # of each active processes started by the tray launcher.
         self.track_file = self.TRACK / "running_processes.log"
 
