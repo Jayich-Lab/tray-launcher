@@ -15,10 +15,10 @@ class ChildScript:
         """Create a ChildScript instance, used in reattaching processes when the tray launcher restarts.
 
         Args:
-            pid: int
-            create_time: float
-            script_path: Path
-            logging_log: Path
+            pid: int, process id
+            create_time: float, epoch time at the process' beginning
+            script_path: Path, path to the script in the .tray_launcher folder
+            logging_log: Path, path to the log of the tray launcher itself
         """
 
         logging.basicConfig(
@@ -65,6 +65,7 @@ class ChildScript:
             raise
 
     def start_script(self):
+        '''Uses subprocess.Popen() to start the .bat file.'''
         self.access_file(_t.localtime(_t.time()))
 
         self.child_script = subprocess.Popen(

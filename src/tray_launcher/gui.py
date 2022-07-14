@@ -39,8 +39,6 @@ class TrayLauncherGUI(QMainWindow):
         self.icon = str(home_path / "icons" / "tray_icon.png")
         self.check_mark = str(home_path / "icons" / "check_mark.png")
 
-        # key: string:                          script.stem
-        # value: tuple (float, QMenu):            (timestamp, three_menu)
         self.currently_running_scripts = {}
         self.script_count = 0
 
@@ -73,14 +71,11 @@ class TrayLauncherGUI(QMainWindow):
         except Exception as err:
             logging.error(err + ": Failed to create new directory to track processes started")
             raise
-        # This file contains information (pid, creation_time, name)
-        # of each active processes started by the tray launcher.
+
         self.track_file = self.TRACK / "running_processes.log"
 
         logging.info("Tray Launcher Started.")
 
-        # key: script.stem
-        # value: QAction
         self.available_scripts = {}
 
         self.init_ui()
@@ -90,13 +85,12 @@ class TrayLauncherGUI(QMainWindow):
         self.update_track()
 
     def check_leftover(self):
-        """Check if processes recorded in the track file are still running, if so, reattach them.
-        Check both the pid and the creation of each processes recorded.
+        """Checks if processes recorded in the track file are still running, if so, reattach them.
+        Checks both the pid and the creation of each processes recorded.
         """
         try:
             f = open(self.track_file, "r")
             for line in f.read().split("\n"):
-                # [0]: pid, [1]: create_time, [2]: stem
                 process_info = line.split(" ")
                 if process_info[0]:
                     info = (int(process_info[0]), float(process_info[1]), process_info[2])
@@ -109,7 +103,9 @@ class TrayLauncherGUI(QMainWindow):
             logging.error(e)
 
     def insert_leftover(self, info):
-        """Reattach processes from last time.
+        """Adds processes back to the tray launcher as if they are started
+            by it.
+
         Args:
             info: an array which has [0]: pid, [1]: create_time, [2]: stem
         """
@@ -223,7 +219,8 @@ class TrayLauncherGUI(QMainWindow):
         return three_menu
 
     def start_new_script(self, script_path):
-        """Starts a new script.
+        """Starts a new script by sending the path to 
+            script manager and starts corresponding guis. 
 
         Args:
             script_path: Path, path to the script to be started.
@@ -233,7 +230,7 @@ class TrayLauncherGUI(QMainWindow):
         if script_path.stem in self.currently_running_scripts:
             return
 
-        self.run_in_manager(script_path, self.script_manager.run_new)
+        self.run_in_manager(script_path, self.script_manager.start_new_script)
         timestamp = max(key for key in self.script_manager.running_child_scripts)  # !
 
         three_menu = self.create_process_menu(script_path, timestamp)
@@ -432,7 +429,9 @@ class TrayLauncherGUI(QMainWindow):
             self.run_new_file(file_path)
 
     def run_new_file(self, file_path):
-        """Attempts to run the given argument as a .bat script
+        """Attempts to run the given argument as a .bat script.
+            If the file is already loaded, run it. If not,
+            load it and then run it.
 
         Args:
             file_path: Path
@@ -508,16 +507,16 @@ class TrayLauncherGUI(QMainWindow):
         self.showMaximized()
         self.resize(0, 0)
 
-        b = QMessageBox()
-        b.setWindowFlag(Qt.WindowStaysOnTopHint)
+        box = QMessageBox()
+        box.setWindowFlag(Qt.WindowStaysOnTopHint)
 
-        refRectangle = b.frameGeometry()
+        refRectangle = box.frameGeometry()
         center = QDesktopWidget().availableGeometry().center()
         refRectangle.moveCenter(center)
-        b.move(refRectangle.topLeft())
+        box.move(refRectangle.topLeft())
 
-        replace_reply = b.question(
-            b,
+        replace_reply = box.question(
+            box,
             "Quit Tray Launcher",
             "Do you want to quit tray launcher?",
             QMessageBox.Yes | QMessageBox.No,

@@ -72,7 +72,8 @@ class TrayLauncherCLI(QObject):
         self.message_to_client.append(" ")
 
     def start(self, data):
-        """Process the "start" command. Start new scripts."""
+        """Process the "start" command. Start new scripts
+            by sending the scripts' names to the run_new_file() method"""
         self.gui.check_active_processes()
 
         for path_str in data[1:]:
@@ -99,8 +100,8 @@ class TrayLauncherCLI(QObject):
             self._on_running_script(self.gui.terminate_script, path_str, " is terminated.")
 
     def list_all(self, data):
-        """Processes the "list -a" command. Writes loaded scripts' stems to the string
-        and re-populate the gui view_all menu.
+        """Processes the "list -a" command. Writes names of all loaded scripts
+            to the CLI and re-populates the gui view_all menu.
         """
         self.gui.available_scripts.clear()
         self.gui.view_all.clear()
@@ -129,8 +130,7 @@ class TrayLauncherCLI(QObject):
                     file_path.unlink()
 
     def list_current(self, data):
-        """Processes the "list -r" command. Writes currently running scripts' stems to the string
-        which will be written back to the client.
+        """Processes the "list -r" command. Writes currently running scripts' stems to the CLI.
         """
         self.gui.check_active_processes()
 

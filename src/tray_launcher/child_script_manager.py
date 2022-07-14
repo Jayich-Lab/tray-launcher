@@ -19,20 +19,19 @@ class ChildScriptManager(QObject):
     def __init__(self):
         super().__init__()
 
-        # key: float, create_time
-        # value: ChildScript
         self.running_child_scripts = {}
 
-    def run_new(self, args):
-        """Starts a new script.
+    def start_new_script(self, args):
+        """Starts a new script by creating a ChildScript object and
+            invoking the subprocess.Popen().
 
         Args:
-            args: (Path, str), the path to the script;
-                            the path to the log file for the TRAY LAUNCHER, not this process.
+            args: tuple of Path and Path, the path to the script;
+                the path to the log file for the TRAY LAUNCHER, not this process.
         """
-        c = child_script.ChildScript(-1, -1.0, Path(args[0]), args[1])
-        c.start_script()
-        self.running_child_scripts[c.create_time] = c
+        child = child_script.ChildScript(-1, -1.0, args[0], args[1])
+        child.start_script()
+        self.running_child_scripts[child.create_time] = child
 
     def show(self, args):
         """Brings windows associated with a script to the foreground.
