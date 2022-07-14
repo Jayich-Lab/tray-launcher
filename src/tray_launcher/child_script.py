@@ -65,7 +65,7 @@ class ChildScript:
             raise
 
     def start_script(self):
-        '''Uses subprocess.Popen() to start the .bat file.'''
+        """Uses subprocess.Popen() to start the .bat file."""
         self.access_file(_t.localtime(_t.time()))
 
         self.child_script = subprocess.Popen(
