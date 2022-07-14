@@ -219,8 +219,8 @@ class TrayLauncherGUI(QMainWindow):
         return three_menu
 
     def start_new_script(self, script_path):
-        """Starts a new script by sending the path to 
-            script manager and starts corresponding guis. 
+        """Starts a new script by sending the path to
+            script manager and starts corresponding guis.
 
         Args:
             script_path: Path, path to the script to be started.
