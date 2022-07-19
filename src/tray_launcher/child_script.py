@@ -5,16 +5,21 @@ import subprocess
 import time as _t
 from pathlib import Path
 
+import psutil as _ps
+
 
 class ChildScript:
     ENCODING = "utf-8"
 
-    def __init__(self, script_path_str, logging_log):
-        self.script_path_str = script_path_str
-        self.script_path = Path(self.script_path_str)
-        self.child_script = None
-        self.child_script_PID = -1
-        self.current_PIDs = []
+    def __init__(self, pid, create_time, script_path, logging_log):
+        """Create a ChildScript instance, used in reattaching processes when the tray launcher restarts.
+
+        Args:
+            pid: int, process id
+            create_time: float, epoch time at the process' beginning
+            script_path: Path, path to the script in the .tray_launcher folder
+            logging_log: Path, path to the log of the tray launcher itself
+        """
 
         logging.basicConfig(
             filename=logging_log,
@@ -22,15 +27,25 @@ class ChildScript:
             format="%(asctime)s %(message)s",
         )
 
-    def start_script(self):
-        t = _t.localtime(_t.time())
+        self.script_path_str = str(script_path)
+        self.script_path = script_path
+        self.child_script = None
+        self.child_script_PID = pid
+        self.current_PIDs = []
+        self.create_time = create_time
 
+        if self.create_time != -1:
+            self.access_file(_t.localtime(self.create_time))
+
+    def access_file(self, t):
+        """Use the creation time of the process to open its log file."""
         log_file = self.get_log_path()
 
         try:
             log_directory = log_file / (
                 str(t.tm_year) + "_" + str(t.tm_mon).zfill(2) + "_" + str(t.tm_mday).zfill(2)
             )
+
             log_directory.mkdir(parents=True, exist_ok=True)
         except Exception as err:
             logging.error(err + ": Failed to create new directory for ChildScript outputs.")
@@ -44,10 +59,14 @@ class ChildScript:
         )
 
         try:
-            self.outputs_file = open(self.log_path, "a")
+            self.outputs_file = open(self.log_path, "a+")
         except Exception as err:
-            logging.error(err + ": Failed to open/create a file for ChildScript outputs.")
+            logging.error(err + ": Failed to open a file for ChildScript outputs.")
             raise
+
+    def start_script(self):
+        """Uses subprocess.Popen() to start the .bat file."""
+        self.access_file(_t.localtime(_t.time()))
 
         self.child_script = subprocess.Popen(
             '"' + self.script_path_str + '"',
@@ -58,6 +77,9 @@ class ChildScript:
         )
 
         self.child_script_PID = self.child_script.pid
+
+        p = _ps.Process(self.child_script_PID)
+        self.create_time = p.create_time()
 
     def terminate_script(self):
         self.update_current_PIDs()
@@ -91,13 +113,14 @@ class ChildScript:
         """Checks if there is any subprocess still running."""
         self.update_current_PIDs()
 
-        if self.child_script.poll() is None:
+        if self.child_script is not None and self.child_script.poll() is None:
             return True
         elif self.current_PIDs:
             return True
         return False
 
     def update_current_PIDs(self):
+        """Populate the self.current_PIDs array with pids of child processes."""
         self.current_PIDs = []
         wmic_ = subprocess.run(
             "wmic process where (ParentProcessId={}) get ProcessId".format(

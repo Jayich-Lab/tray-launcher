@@ -5,6 +5,7 @@ import time as _t
 from functools import partial
 from pathlib import Path
 
+import psutil as _ps
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
@@ -33,9 +34,13 @@ class TrayLauncherGUI(QMainWindow):
 
         self.LOGS = user_home / "logs"
         self.AVAILABLE_SCRIPTS = user_home / "scripts"
+        self.TRACK = user_home / "track"
 
         self.icon = str(home_path / "icons" / "tray_icon.png")
         self.check_mark = str(home_path / "icons" / "check_mark.png")
+
+        self.currently_running_scripts = {}
+        self.script_count = 0
 
         super().__init__()
         self.script_manager = child_script_manager.ChildScriptManager()
@@ -46,7 +51,6 @@ class TrayLauncherGUI(QMainWindow):
             )
             self._log_directory.mkdir(parents=True, exist_ok=True)
         except Exception:
-            # print(err + ": Failed to create new directory for outputs")
             raise
 
         self.tray_launcher_log = self._log_directory / "tray_launcher.log"
@@ -62,19 +66,67 @@ class TrayLauncherGUI(QMainWindow):
             logging.error(err + ": Failed to create new directory for available scripts")
             raise
 
+        try:
+            self.TRACK.mkdir(parents=True, exist_ok=True)
+        except Exception as err:
+            logging.error(err + ": Failed to create new directory to track processes started")
+            raise
+
+        self.track_file = self.TRACK / "running_processes.log"
+
         logging.info("Tray Launcher Started.")
 
-        self.script_count = 0
-
-        # key: string:                          script.stem
-        # value: tuple (int, QMenu):            (timestamp, three_menu)
-        self.currently_running_scripts = {}
-
-        # key: script.stem
-        # value: QAction
         self.available_scripts = {}
 
         self.init_ui()
+
+        self.check_leftover()
+
+        self.update_track()
+
+    def check_leftover(self):
+        """Checks if processes recorded in the track file are still running, if so, reattach them.
+        Checks both the pid and the creation of each processes recorded.
+        """
+        try:
+            f = open(self.track_file, "r")
+            for line in f.read().split("\n"):
+                process_info = line.split(" ")
+                if process_info[0]:
+                    info = (int(process_info[0]), float(process_info[1]), process_info[2])
+
+                    if _ps.pid_exists(info[0]):
+                        p = _ps.Process(info[0])
+                        if float(p.create_time()) == info[1]:
+                            self.insert_leftover(info)
+        except Exception as e:
+            logging.error(e)
+
+    def insert_leftover(self, info):
+        """Adds processes back to the tray launcher as if they are started
+            by it.
+
+        Args:
+            info: an array which has [0]: pid, [1]: create_time, [2]: stem
+        """
+        script_path = self.to_loaded_path(info[2])
+
+        self.script_manager.running_child_scripts[info[1]] = child_script.ChildScript(
+            info[0], info[1], script_path, self.tray_launcher_log
+        )
+
+        three_menu = self.create_process_menu(script_path, info[1])
+
+        self.context_menu.insertMenu(self.bottom_separator, three_menu)
+
+        self.none_currently_running.setVisible(False)
+        self.script_count += 1
+
+        logging.info("{} is retrieved.".format(info[2]))
+
+        self.currently_running_scripts[info[2]] = (info[1], three_menu)
+
+        self.available_scripts[info[2]].setEnabled(False)
 
     def init_ui(self):
         self.trayicon = QSystemTrayIcon(self)
@@ -137,18 +189,7 @@ class TrayLauncherGUI(QMainWindow):
             return None
         return loaded_path
 
-    def start_new_script(self, script_path):
-        """Starts a new script.
-
-        Args:
-            script_path: Path, path to the script to be started.
-        """
-        self.prepare_context_menu()
-
-        if script_path.stem in self.currently_running_scripts:
-            return
-
-        timestamp = _t.time()
+    def create_process_menu(self, script_path, timestamp):
         args = (script_path, timestamp)
         three_menu = QMenu(script_path.stem, self)
 
@@ -164,13 +205,6 @@ class TrayLauncherGUI(QMainWindow):
         terminateAction.triggered.connect(partial(self.terminate_script, (args, three_menu)))
         three_menu.addAction(terminateAction)
 
-        self.run_in_manager(args, self.script_manager.run_new)
-
-        self.none_currently_running.setVisible(False)
-        self.script_count += 1
-
-        logging.info("{} was started.".format(script_path.stem))
-
         logAction = QAction("Log", self)
         logAction.triggered.connect(
             partial(
@@ -180,12 +214,38 @@ class TrayLauncherGUI(QMainWindow):
         )
         three_menu.insertAction(restartAction, logAction)
 
+        three_menu.menuAction().setIcon(QIcon(self.check_mark))
+
+        return three_menu
+
+    def start_new_script(self, script_path):
+        """Starts a new script by sending the path to
+            script manager and starts corresponding guis.
+
+        Args:
+            script_path: Path, path to the script to be started.
+        """
+        self.prepare_context_menu()
+
+        if script_path.stem in self.currently_running_scripts:
+            return
+
+        self.run_in_manager(script_path, self.script_manager.start_new_script)
+        timestamp = max(key for key in self.script_manager.running_child_scripts)  # !
+
+        three_menu = self.create_process_menu(script_path, timestamp)
         self.context_menu.insertMenu(self.bottom_separator, three_menu)
+
+        self.none_currently_running.setVisible(False)
+        self.script_count += 1
+
+        logging.info("{} is started.".format(script_path.stem))
 
         self.currently_running_scripts[script_path.stem] = (timestamp, three_menu)
 
-        three_menu.menuAction().setIcon(QIcon(self.check_mark))
         self.available_scripts[script_path.stem].setEnabled(False)
+
+        self.check_active_processes()
 
     def show_script(self, args):
         """Bring windows associated with a script to the foreground, if any.
@@ -224,6 +284,8 @@ class TrayLauncherGUI(QMainWindow):
             if (args[0][0]).stem in self.available_scripts:
                 self.available_scripts[(args[0][0]).stem].setIcon(QIcon())
                 self.available_scripts[(args[0][0]).stem].setEnabled(True)
+
+            self.check_active_processes()
 
             logging.info("{} was terminated through Tray Launcher.".format(args[0][0].stem))
 
@@ -277,7 +339,7 @@ class TrayLauncherGUI(QMainWindow):
                     file_path.unlink()
 
     def check_available_scripts(self):
-        """Reloads .bat files in the \\scripts directory to the view_all menu"""
+        """Reloads .bat files in the \\scripts directory to the view_all menu."""
         self.add_available_scripts(self.view_all)
 
         self.view_in_directory = QAction("[View in Directory]", self)
@@ -286,9 +348,25 @@ class TrayLauncherGUI(QMainWindow):
         )
         self.view_all.addAction(self.view_in_directory)
 
-    def prepare_context_menu(self):
-        """Checks if scripts are still running; if not, remove them from the menu.
-        Also rebuilds the the view_all menu
+    def update_track(self):
+        """Write the timestamp and pid of active processes into the track file."""
+        try:
+            f = open(self.track_file, "w")
+            for childscript in self.script_manager.running_child_scripts.values():
+                f.write(
+                    str(childscript.child_script_PID)
+                    + " "
+                    + str(childscript.create_time)
+                    + " "
+                    + str(childscript.script_path.stem)
+                    + "\n"
+                )
+        except Exception as e:
+            logging.error(e)
+
+    def check_active_processes(self):
+        """Checks if scripts are still running; if not, remove them from the menu
+        and from the currently_running_scripts array.
         """
         to_del = []
         for (
@@ -297,7 +375,6 @@ class TrayLauncherGUI(QMainWindow):
         ) in self.script_manager.running_child_scripts.items():
             if not child_script_obj.is_active():
                 child_script_obj.outputs_file.close()
-
                 to_del.append(timestamp)
                 self.context_menu.removeAction(
                     self.currently_running_scripts[child_script_obj.script_path.stem][
@@ -305,7 +382,6 @@ class TrayLauncherGUI(QMainWindow):
                     ].menuAction()
                 )
                 del self.currently_running_scripts[child_script_obj.script_path.stem]
-
                 self.script_count -= 1
                 if self.script_count == 0:
                     self.none_currently_running.setVisible(True)
@@ -314,10 +390,13 @@ class TrayLauncherGUI(QMainWindow):
                         child_script_obj.script_path_str
                     )
                 )
-
         for ts in to_del:
             del self.script_manager.running_child_scripts[ts]
 
+        self.update_track()
+
+    def prepare_context_menu(self):
+        self.check_active_processes()
         self.check_available_scripts()
 
     def load_scripts_from_file_dialogue(self, dir):
@@ -350,7 +429,9 @@ class TrayLauncherGUI(QMainWindow):
             self.run_new_file(file_path)
 
     def run_new_file(self, file_path):
-        """Attempts to run the given argument as a .bat script
+        """Attempts to run the given argument as a .bat script.
+            If the file is already loaded, run it. If not,
+            load it and then run it.
 
         Args:
             file_path: Path
@@ -425,18 +506,26 @@ class TrayLauncherGUI(QMainWindow):
         self.showMinimized()
         self.showMaximized()
         self.resize(0, 0)
-        b = QMessageBox()
-        b.setWindowFlag(Qt.WindowStaysOnTopHint)
-        replace_reply = b.question(
-            self,
+
+        box = QMessageBox()
+        box.setWindowFlag(Qt.WindowStaysOnTopHint)
+
+        refRectangle = box.frameGeometry()
+        center = QDesktopWidget().availableGeometry().center()
+        refRectangle.moveCenter(center)
+        box.move(refRectangle.topLeft())
+
+        replace_reply = box.question(
+            box,
             "Quit Tray Launcher",
             "Do you want to quit tray launcher?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.Yes,
         )
+
         if replace_reply == QMessageBox.Yes:
-            for tuple in self.currently_running_scripts.values():
-                self.script_manager.terminate(tuple[0])
+            self.check_active_processes()
+
             logging.info("Tray Launcher Exited.")
             self.script_manager.deleteLater()
             qApp.quit()
