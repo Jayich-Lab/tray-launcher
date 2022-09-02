@@ -265,8 +265,20 @@ def run_pythonw():
         print(err + ": Failed to create new directory for tray launcher outputs")
         raise
     with open(log_directory / "tray_launcher.log", "a") as launcher_log:
+        if "VIRTUAL_ENV" in os.environ:
+            # using venv or virtualenv
+            # running `python` may use the system python instead of the venv python.
+            python_path = sys.executable
+            activate_path = os.path.join(
+                os.path.dirname(python_path),
+                "activate.bat"
+            )
+            activate_command = '"' + activate_path + '" && '
+        else:
+            # using Conda or system python.
+            activate_command = ""
         subprocess.Popen(
-            "python " + '"' + str(HOME_PATH) + '"',
+            activate_command + "python " + '"' + str(HOME_PATH) + '"',
             encoding="utf-8",
             creationflags=subprocess.CREATE_NO_WINDOW,
             stdout=launcher_log,
