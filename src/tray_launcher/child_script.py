@@ -12,7 +12,9 @@ class ChildScript:
     ENCODING = "utf-8"
 
     def __init__(self, pid, create_time, script_path, logging_log):
-        """Create a ChildScript instance, used in reattaching processes when the tray launcher restarts.
+        """Create a ChildScript instance.
+
+        This instance is used in reattaching processes when the tray launcher restarts.
 
         Args:
             pid: int, process id

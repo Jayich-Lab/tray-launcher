@@ -269,10 +269,7 @@ def run_pythonw():
             # using venv or virtualenv
             # running `python` may use the system python instead of the venv python.
             python_path = sys.executable
-            activate_path = os.path.join(
-                os.path.dirname(python_path),
-                "activate.bat"
-            )
+            activate_path = os.path.join(os.path.dirname(python_path), "activate.bat")
             activate_command = '"' + activate_path + '" && '
         else:
             # using Conda or system python.
