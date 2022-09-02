@@ -32,3 +32,5 @@ A log for the tray-launcher and associated *.bat* scripts will be saved under `%
 If *tray-launcher* crashes, scripts started with *tray-launcher* will **not** terminate.
 
 There is an expected delay when executing `launcher run`.
+
+When the *tray-launcher* is run in a `conda` environment, scripts started with *tray-launcher* will run in the same `conda` environment. When a `venv` environment is used, scripts may not inherit the environment, and the user may need to add the activate command in a script if it should be run in the `venv`.
