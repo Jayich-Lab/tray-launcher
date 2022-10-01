@@ -314,6 +314,32 @@ class TrayLauncherGUI(QMainWindow):
         dummy_action.triggered.connect(partial(func, args))
         dummy_action.trigger()
 
+    # def add_available_scripts(self, target_menu):
+    #     """Loads all .bat files in the \\scripts directory to the menu specified.
+
+    #     Args:
+    #         target_menu: QMenu, the menu to be loaded with .bat file stems.
+    #     """
+    #     self.available_scripts.clear()
+    #     target_menu.clear()
+
+    #     for file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
+    #         if file_path.is_file() and file_path.suffix == ".bat":
+    #             st = file_path.stem
+
+    #             action = target_menu.addAction(st)
+    #             action.triggered.connect(partial(self.start_new_script, file_path))
+    #             self.available_scripts[st] = action
+
+    #             if st in self.currently_running_scripts:
+    #                 self.available_scripts[st].setIcon(QIcon(self.check_mark))
+    #                 self.available_scripts[st].setEnabled(False)
+    #         else:
+    #             if file_path.is_file:
+    #                 file_path.unlink()
+
+
+
     def add_available_scripts(self, target_menu):
         """Loads all .bat files in the \\scripts directory to the menu specified.
 
@@ -323,20 +349,18 @@ class TrayLauncherGUI(QMainWindow):
         self.available_scripts.clear()
         target_menu.clear()
 
-        for file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
-            if file_path.is_file() and file_path.suffix == ".bat":
-                st = file_path.stem
+        for file_path in Path(self.AVAILABLE_SCRIPTS).rglob("*.bat"):
+            st = file_path.stem
 
-                action = target_menu.addAction(st)
-                action.triggered.connect(partial(self.start_new_script, file_path))
-                self.available_scripts[st] = action
+            action = target_menu.addAction(st)
+            action.triggered.connect(partial(self.start_new_script, file_path))
+            self.available_scripts[st] = action
 
-                if st in self.currently_running_scripts:
-                    self.available_scripts[st].setIcon(QIcon(self.check_mark))
-                    self.available_scripts[st].setEnabled(False)
-            else:
-                if file_path.is_file:
-                    file_path.unlink()
+            if st in self.currently_running_scripts:
+                self.available_scripts[st].setIcon(QIcon(self.check_mark))
+                self.available_scripts[st].setEnabled(False)
+
+
 
     def check_available_scripts(self):
         """Reloads .bat files in the \\scripts directory to the view_all menu."""
@@ -352,6 +376,8 @@ class TrayLauncherGUI(QMainWindow):
         """Write the timestamp and pid of active processes into the track file."""
         try:
             f = open(self.track_file, "w")
+
+            # Take a look at the values of this array
             for childscript in self.script_manager.running_child_scripts.values():
                 f.write(
                     str(childscript.child_script_PID)
@@ -441,12 +467,12 @@ class TrayLauncherGUI(QMainWindow):
             logging.info("Only .bat file is accepted.")
             return False
 
-        elif file_path.parent == self.AVAILABLE_SCRIPTS:
+        elif self.AVAILABLE_SCRIPTS in file_path.parents:
             self.start_new_script(file_path)
             return True
         else:
             if self.load_script(file_path):
-                file_path = self.to_loaded_path(file_path.stem)
+                # file_path = self.to_loaded_path(file_path.stem)
                 self.start_new_script(file_path)
             return True
 
@@ -461,7 +487,7 @@ class TrayLauncherGUI(QMainWindow):
         isDuplicateName = False
 
         if script_path.is_file() and script_path.suffix == ".bat":
-            for existing_file_path in Path.iterdir(self.AVAILABLE_SCRIPTS):
+            for existing_file_path in Path(self.AVAILABLE_SCRIPTS).rglob("*.bat"):
                 if existing_file_path.stem == script_path.stem:
                     isDuplicateName = True
                     break

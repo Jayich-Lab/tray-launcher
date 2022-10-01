@@ -99,6 +99,38 @@ class TrayLauncherCLI(QObject):
         for path_str in data[1:]:
             self._on_running_script(self.gui.terminate_script, path_str, " is terminated.")
 
+    # def list_all(self, data):
+    #     """Processes the "list -a" command. Writes names of all loaded scripts
+    #     to the CLI and re-populates the gui view_all menu.
+    #     """
+    #     self.gui.available_scripts.clear()
+    #     self.gui.view_all.clear()
+
+    #     self.gui.check_active_processes()
+
+    #     for file_path in Path.iterdir(self.gui.AVAILABLE_SCRIPTS):
+    #         if file_path.is_file() and file_path.suffix == ".bat":
+    #             st = file_path.stem
+
+    #             action = self.gui.view_all.addAction(st)
+    #             action.triggered.connect(partial(self.gui.start_new_script, file_path))
+    #             self.gui.available_scripts[st] = action
+
+    #             if st in self.gui.currently_running_scripts:
+    #                 self.gui.available_scripts[st].setIcon(QIcon(self.gui.check_mark))
+    #                 self.gui.available_scripts[st].setEnabled(False)
+
+    #                 self.message_to_client.append(
+    #                     "{} \t \t \t \t \t \t(currently running)".format(st)
+    #                 )
+    #             else:
+    #                 self.message_to_client.append("{}".format(st))
+    #         else:
+    #             if file_path.is_file:
+    #                 file_path.unlink()
+
+
+
     def list_all(self, data):
         """Processes the "list -a" command. Writes names of all loaded scripts
         to the CLI and re-populates the gui view_all menu.
@@ -108,26 +140,24 @@ class TrayLauncherCLI(QObject):
 
         self.gui.check_active_processes()
 
-        for file_path in Path.iterdir(self.gui.AVAILABLE_SCRIPTS):
-            if file_path.is_file() and file_path.suffix == ".bat":
-                st = file_path.stem
+        for file_path in Path(self.gui.AVAILABLE_SCRIPTS).rglob("*.bat"):
+            st = file_path.stem
 
-                action = self.gui.view_all.addAction(st)
-                action.triggered.connect(partial(self.gui.start_new_script, file_path))
-                self.gui.available_scripts[st] = action
+            action = self.gui.view_all.addAction(st)
+            action.triggered.connect(partial(self.gui.start_new_script, file_path))
+            self.gui.available_scripts[st] = action
 
-                if st in self.gui.currently_running_scripts:
-                    self.gui.available_scripts[st].setIcon(QIcon(self.gui.check_mark))
-                    self.gui.available_scripts[st].setEnabled(False)
+            if st in self.gui.currently_running_scripts:
+                self.gui.available_scripts[st].setIcon(QIcon(self.gui.check_mark))
+                self.gui.available_scripts[st].setEnabled(False)
 
-                    self.message_to_client.append(
-                        "{} \t \t \t \t \t \t(currently running)".format(st)
-                    )
-                else:
-                    self.message_to_client.append("{}".format(st))
+                self.message_to_client.append(
+                    "{} \t \t \t \t \t \t(currently running)".format(st)
+                )
             else:
-                if file_path.is_file:
-                    file_path.unlink()
+                self.message_to_client.append("{}".format(st))
+
+
 
     def list_current(self, data):
         """Processes the "list -r" command. Writes currently running scripts' stems to the CLI."""
