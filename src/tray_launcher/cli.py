@@ -99,6 +99,7 @@ class TrayLauncherCLI(QObject):
         for path_str in data[1:]:
             self._on_running_script(self.gui.terminate_script, path_str, " is terminated.")
 
+    # This is commented out because the below function incorporates sub-directory
     # def list_all(self, data):
     #     """Processes the "list -a" command. Writes names of all loaded scripts
     #     to the CLI and re-populates the gui view_all menu.
