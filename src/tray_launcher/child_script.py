@@ -71,7 +71,8 @@ class ChildScript:
         self.access_file(_t.localtime(_t.time()))
 
         self.child_script = subprocess.Popen(
-            '"' + self.script_path_str + '"',
+            # TODO: Python >= 3.8: Drop str cast (https://github.com/python/cpython/issues/76142).
+            (self.script_path_str,),
             encoding=self.ENCODING,
             stdout=self.outputs_file,
             stderr=self.outputs_file,
@@ -125,8 +126,13 @@ class ChildScript:
         """Populate the self.current_PIDs array with pids of child processes."""
         self.current_PIDs = []
         wmic_ = subprocess.run(
-            "wmic process where (ParentProcessId={}) get ProcessId".format(
-                str(self.child_script_PID)
+            (
+                "wmic",
+                "process",
+                "where",
+                f"(ParentProcessId={self.child_script_PID})",
+                "get",
+                "ProcessId",
             ),
             encoding=self.ENCODING,
             stdout=subprocess.PIPE,
