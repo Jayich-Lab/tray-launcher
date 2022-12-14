@@ -266,7 +266,7 @@ def run_pythonw():
         raise
     with open(log_directory / "tray_launcher.log", "a") as launcher_log:
         subprocess.Popen(
-            f'{sys.executable} "{HOME_PATH}"',
+            (sys.executable, HOME_PATH),
             encoding="utf-8",
             creationflags=subprocess.CREATE_NO_WINDOW,
             stdout=launcher_log,
