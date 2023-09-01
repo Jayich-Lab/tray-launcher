@@ -2,8 +2,10 @@
 
 [![Python: 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://docs.python.org/3.7/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PyPI: tray-launcher](https://img.shields.io/pypi/v/tray-launcher)](https://pypi.org/project/tray-launcher/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PyPI: tray-launcher](https://img.shields.io/pypi/v/tray-launcher)](https://pypi.org/project/tray-launcher/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/tray-launcher?color=%23ADFF2F)](https://pypi.org/project/tray-launcher/)
+
 
 A launcher for Windows that resides in the taskbar for managing .bat scripts.
 
