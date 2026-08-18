@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QObject
+from PyQt6.QtCore import QObject
 from win32con import (
     HWND_NOTOPMOST,
     HWND_TOPMOST,

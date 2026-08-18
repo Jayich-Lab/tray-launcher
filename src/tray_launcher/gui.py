@@ -6,11 +6,11 @@ from functools import partial
 from pathlib import Path
 
 import psutil as _ps
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import (
     QAction,
-    QDesktopWidget,
+    QApplication,
     QFileDialog,
     QLabel,
     QMainWindow,
@@ -19,7 +19,6 @@ from PyQt5.QtWidgets import (
     QSystemTrayIcon,
     QVBoxLayout,
     QWidget,
-    qApp,
 )
 
 from tray_launcher import child_script, child_script_manager
@@ -478,16 +477,16 @@ class TrayLauncherGUI(QMainWindow):
                 self.showMaximized()
                 self.resize(0, 0)
                 b = QMessageBox()
-                b.setWindowFlag(Qt.WindowStaysOnTopHint)
+                b.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
                 replace_reply = b.question(
                     self,
                     "Replace File",
                     "A file named {} already exists in "
                     "\\scripts. Do you want to replace it?".format(script_path.name),
-                    QMessageBox.Yes | QMessageBox.No,
-                    QMessageBox.No,
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    QMessageBox.StandardButton.No,
                 )
-                if replace_reply == QMessageBox.Yes:
+                if replace_reply == QMessageBox.StandardButton.Yes:
                     try:
                         _su.copy(script_path, self.AVAILABLE_SCRIPTS)
                         logging.info("{} was replaced in \\scripts.".format(str(script_path)))
@@ -508,10 +507,10 @@ class TrayLauncherGUI(QMainWindow):
         self.resize(0, 0)
 
         box = QMessageBox()
-        box.setWindowFlag(Qt.WindowStaysOnTopHint)
+        box.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
 
         refRectangle = box.frameGeometry()
-        center = QDesktopWidget().availableGeometry().center()
+        center = QApplication.primaryScreen().availableGeometry().center()
         refRectangle.moveCenter(center)
         box.move(refRectangle.topLeft())
 
@@ -519,16 +518,16 @@ class TrayLauncherGUI(QMainWindow):
             box,
             "Quit Tray Launcher",
             "Do you want to quit tray launcher?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.Yes,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes,
         )
 
-        if replace_reply == QMessageBox.Yes:
+        if replace_reply == QMessageBox.StandardButton.Yes:
             self.check_active_processes()
 
             logging.info("Tray Launcher Exited.")
             self.script_manager.deleteLater()
-            qApp.quit()
+            QApplication.instance().quit()
 
     def show_logs(self, log_path):
         """Displays the file specified.
@@ -545,7 +544,7 @@ class TrayLauncherGUI(QMainWindow):
         self.help_window.resize(100, 100)
 
         Rect = self.help_window.frameGeometry()
-        center = QDesktopWidget().availableGeometry().center()
+        center = QApplication.primaryScreen().availableGeometry().center()
         Rect.moveCenter(center)
         self.help_window.move(Rect.topLeft())
 
