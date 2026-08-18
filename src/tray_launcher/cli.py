@@ -6,10 +6,10 @@ import time as _t
 from functools import partial
 from pathlib import Path
 
-from PyQt5.QtCore import QByteArray, QDataStream, QIODevice, QObject
-from PyQt5.QtGui import QIcon
-from PyQt5.QtNetwork import QHostAddress, QTcpServer
-from PyQt5.QtWidgets import QApplication, qApp
+from PyQt6.QtCore import QByteArray, QDataStream, QIODevice, QObject
+from PyQt6.QtGui import QIcon
+from PyQt6.QtNetwork import QHostAddress, QTcpServer
+from PyQt6.QtWidgets import QApplication
 
 from tray_launcher import gui, tray_launcher_client
 
@@ -172,7 +172,7 @@ class TrayLauncherCLI(QObject):
 
         logging.info("Tray Launcher Exited.")
         self.gui.script_manager.deleteLater()
-        qApp.quit()
+        QApplication.instance().quit()
 
     def process_invalid_command(self, data):
         """Processes an invalid command."""
@@ -224,8 +224,8 @@ class TrayLauncherCLI(QObject):
         self.message_to_client = []
 
         block = QByteArray()
-        out = QDataStream(block, QIODevice.ReadWrite)
-        out.setVersion(QDataStream.Qt_5_0)
+        out = QDataStream(block, QIODevice.OpenModeFlag.ReadWrite)
+        out.setVersion(QDataStream.Version.Qt_5_0)
         out.writeUInt16(0)
         message = bytes(message, encoding="ascii")
         out.writeString(message)
@@ -238,7 +238,7 @@ def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     lc = TrayLauncherCLI()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
     lc.deleteLater()
 
 
