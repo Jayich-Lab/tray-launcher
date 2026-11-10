@@ -1,7 +1,7 @@
 import os
 
-from PyQt5.QtCore import QDataStream, QIODevice, QObject
-from PyQt5.QtNetwork import QTcpSocket
+from PyQt6.QtCore import QDataStream, QIODevice, QObject
+from PyQt6.QtNetwork import QTcpSocket
 
 
 class TrayLauncherClient(QObject):
@@ -28,7 +28,9 @@ class TrayLauncherClient(QObject):
         """
         instance = cls("test", "empty")
         instance.client.connectToHost(
-            "127.0.0.1", int(os.environ.get("TRAY_LAUNCHER_PORT", 7686)), QIODevice.ReadWrite
+            "127.0.0.1",
+            int(os.environ.get("TRAY_LAUNCHER_PORT", 7686)),
+            QIODevice.OpenModeFlag.ReadWrite,
         )
         success_connect = instance.client.waitForConnected()
 
@@ -46,7 +48,9 @@ class TrayLauncherClient(QObject):
     def attempt_connect(self):
         """Connects to the tray launcher server."""
         self.client.connectToHost(
-            "127.0.0.1", int(os.environ.get("TRAY_LAUNCHER_PORT", 7686)), QIODevice.ReadWrite
+            "127.0.0.1",
+            int(os.environ.get("TRAY_LAUNCHER_PORT", 7686)),
+            QIODevice.OpenModeFlag.ReadWrite,
         )
         success_connect = self.client.waitForConnected()
 
@@ -70,7 +74,7 @@ class TrayLauncherClient(QObject):
 
     def read_from_server(self):
         instr = QDataStream(self.client)
-        instr.setVersion(QDataStream.Qt_5_0)
+        instr.setVersion(QDataStream.Version.Qt_5_0)
         if self.blockSize == 0:
             if self.client.bytesAvailable() < 2:
                 return
