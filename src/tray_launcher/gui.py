@@ -7,9 +7,8 @@ from pathlib import Path
 
 import psutil as _ps
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
-    QAction,
     QApplication,
     QFileDialog,
     QLabel,
